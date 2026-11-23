@@ -717,15 +717,34 @@ const nearingTasks = tasks
 .filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
 .sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
 const nearingEl = document.getElementById("nearingSummary");
-if (nearingTasks.length === 0) {
-nearingEl.innerHTML = 'No tasks due within the next 48 hours.';
-} else {
-nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
-const info = getCountdownInfo(t.targetDate, t.status);
-return '' + t.title + ' (' + t.category + ')' + info.text + '';
-}).join("");
-}
-}
+const nearingEl = document.getElementById("nearingSummary");
+      nearingEl.innerHTML = "";
+      if (nearingTasks.length === 0) {
+        const emptyLi = document.createElement("li");
+        emptyLi.style.color = "var(--text-muted)";
+        emptyLi.textContent = "No tasks due within the next 48 hours.";
+        nearingEl.appendChild(emptyLi);
+      } else {
+        nearingTasks.slice(0, 5).forEach(function(t) {
+          const info = getCountdownInfo(t.targetDate, t.status);
+          const li = document.createElement("li");
+          li.style.cssText = "padding: 8px 0; border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; align-items: center; gap: 12px;";
+
+          const left = document.createElement("span");
+          const strong = document.createElement("strong");
+          strong.textContent = t.title;
+          left.appendChild(strong);
+          left.appendChild(document.createTextNode(" (" + t.category + ")"));
+
+          const right = document.createElement("span");
+          right.style.cssText = "color: " + (info.overdue ? "#dc2626" : "#d97706") + "; font-weight: 700; white-space: nowrap;";
+          right.textContent = info.text;
+
+          li.appendChild(left);
+          li.appendChild(right);
+          nearingEl.appendChild(li);
+        });
+      }
     function renderTasks() {
       const subFilter = document.getElementById("filterSubcategory").value;
       const statusFilter = document.getElementById("filterStatus").value;
