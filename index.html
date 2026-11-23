@@ -326,6 +326,7 @@
       </div>
     </div>
   </div>
+
   <script>
     var CATEGORIES = {
       "All": [],
@@ -353,9 +354,11 @@
         { id: "3", title: "Weekly Grocery Run", category: "Home Chores", subcategory: "Groceries", targetDate: new Date(Date.now() + 72 * 3600000).toISOString().slice(0, 16), priority: "Medium", status: "In Progress", recurring: "weekly", reminderMins: 60, notes: "Milk & eggs | Fresh produce | Whole grain bread" }
       ];
     }
+
     function statusClass(s) {
-  return "status-" + s.split(" ").join("-");
-}
+      return "status-" + s.split(" ").join("-");
+    }
+
     function saveTasks() {
       try { localStorage.setItem("checklist_tasks_v1", JSON.stringify(tasks)); } catch (e) {}
     }
@@ -539,13 +542,11 @@
         if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
         return w[b.priority] - w[a.priority];
       });
-
       var el = document.getElementById("taskList");
       if (list.length === 0) {
         el.innerHTML = '<div class="card" style="text-align:center;color:var(--text-muted);">No activities match your filters.</div>';
         return;
       }
-
       var html = "";
 for (var i = 0; i < list.length; i++) {
 var t = list[i];
@@ -614,7 +615,7 @@ document.getElementById("reminderBanner").style.display = "flex";
 }
 }, 1000);
 document.getElementById("filterSubcategory").onchange = renderTasks;
-document.getElementById("filter").onchange = renderTasks;
+document.getElementById("filterStatus").onchange = renderTasks;
 document.getElementById("sortBy").onchange = renderTasks;
 document.getElementById("viewToggleBtn").onclick = function(e) {
 compactMode = !compactMode;
@@ -625,7 +626,7 @@ document.getElementById("shareBtn").onclick = function() {
 var lines = ["TEMPOFLOW SUMMARY", "================="];
 for (var i = 0; i < tasks.length; i++) {
 var t = tasks[i];
-lines.push("* [" + t. + "] " + t.title + " (" + t.category + " > " + t.subcategory + ") - Due: " + new Date(t.targetDate).toLocaleString());
+lines.push("* [" + t.status + "] " + t.title + " (" + t.category + " > " + t.subcategory + ") - Due: " + new Date(t.targetDate).toLocaleString());
 }
 document.getElementById("shareText").value = lines.join(String.fromCharCode(10));
 document.getElementById("shareModal").style.display = "flex";
