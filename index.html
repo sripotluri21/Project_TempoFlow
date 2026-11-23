@@ -284,398 +284,244 @@
       </select>
       <select id="filterStatus">
         <option value="ALL">All Statuses</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Waiting on">Waiting on</option>
+        <option value="Hold">Hold</option>
+        <option value="Complete">Complete</option>
+        <option value="Not needed">Not needed</option>
+      </select>
+      <select id="sortBy">
+        <option value="dateAsc">Sort: Nearest Target Date</option>
+        <option value="dateDesc">Sort: Furthest Target Date</option>
+        <option value="priority">Sort: Highest Priority</option>
+      </select>
+    </div>
 
-In Progress
-Waiting on
-Hold
-Complete
-Not needed
+    <div id="taskList" class="task-list"></div>
+  </div>
 
+  <div id="shareModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Share Checklist Summary</h3>
+      <textarea id="shareText" rows="10" readonly></textarea>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" id="copyShareBtn" class="primary">Copy to Clipboard</button>
+        <button type="button" onclick="closeModal('shareModal')" class="secondary">Close</button>
+      </div>
+    </div>
+  </div>
 
-Sort: Nearest Target Date
-Sort: Furthest Target Date
-Sort: Highest Priority
-Share Checklist Summary
-Copy to Clipboard
-Close
-Choose Background Theme
-Scenic Landscapes & Gradients
-Custom Image URL:
-Apply
-Done
-const CATEGORIES = {
-"All": [],
-"Personal": ["Bill Payments", "Health", "Meet ups", "Family Gatherings", "Birthday Reminders"],
-"Work": ["Project Deadlines", "Meeting Dates", "Tasks To Do"],
-"Home Chores": ["Groceries", "To Do"],
-"Kids": ["School", "Activities", "Appointments"]
-};
-const STATUSES = ["In Progress", "Waiting on", "Hold", "Complete", "Not needed"];
-let activeCategory = "All";
-let compactMode = false;
-let notifiedIds = new Set();
-let tasks = [];
-try {
-const saved = localStorage.getItem("checklist_tasks_v1");
-if (saved) tasks = JSON.parse(saved);
-} catch (e) {
-tasks = [];
-}
-if (!Array.isArray(tasks) || tasks.length === 0) {
-tasks = [
-{
-id: "1",
-title: "Pay Electricity & Internet Bills",
-category: "Personal",
-subcategory: "Bill Payments",
-targetDate: new Date(Date.now() + 18 * 3600 * 1000).toISOString().slice(0, 16),
-priority: "High",
-status: "In Progress",
-recurring: "monthly",
-reminderMins: 60,
-notes: "Check autopay confirmation\nDownload PDF receipt"
-},
-{
-id: "2",
-title: "Q4 Project Milestone Review",
-category: "Work",
-subcategory: "Project Deadlines",
-targetDate: new Date(Date.now() + 42 * 3600 * 1000).toISOString().slice(0, 16),
-priority: "High",
-status: "Waiting on",
-recurring: "none",
-reminderMins: 1440,
-notes: "Waiting on design team assets\nFinalize slide deck"
-},
-{
-id: "3",
-title: "Weekly Grocery Run",
-category: "Home Chores",
-subcategory: "Groceries",
-targetDate: new Date(Date.now() + 72 * 3600 * 1000).toISOString().slice(0, 16),
-priority: "Medium",
-status: "In Progress",
-recurring: "weekly",
-reminderMins: 60,
-notes: "Milk & eggs\nFresh produce\nWhole grain bread"
-}
-];
-}
-function statusClass(status) {
-return "status-" + status.replace(/\s+/g, "-");
-}
-function saveTasks() {
-try {
-localStorage.setItem("checklist_tasks_v1", JSON.stringify(tasks));
-} catch (e) {}
-}
-function initUI() {
-const tabsEl = document.getElementById("categoryTabs");
-tabsEl.innerHTML = Object.keys(CATEGORIES).map(function(cat) {
-return '' + cat + '';
-}).join("");
-const catSelect = document.getElementById("taskCategory");
-catSelect.innerHTML = Object.keys(CATEGORIES)
-.filter(function(c) { return c !== "All"; })
-.map(function(cat) { return '' + cat + ''; })
-.join("");
-catSelect.addEventListener("change", updateFormSubcategories);
-updateFormSubcategories();
-updateFilterSubcategories();
-const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
-document.getElementById("taskDate").value = tomorrow.toISOString().slice(0, 16);
-}
-function updateFormSubcategories() {
-const cat = document.getElementById("taskCategory").value;
-const subSelect = document.getElementById("taskSubcategory");
-const subs = CATEGORIES[cat] || [];
-subSelect.innerHTML = subs.map(function(sub) {
-return '' + sub + '';
-}).join("");
-}
-function updateFilterSubcategories() {
-const filterSub = document.getElementById("filterSubcategory");
-let subs = [];
-if (activeCategory === "All") {
-Object.values(CATEGORIES).forEach(function(arr) {
-subs = subs.concat(arr);
-});
-} else {
-subs = CATEGORIES[activeCategory] || [];
-}
-filterSub.innerHTML = 'All Subcategories' +
-subs.map(function(s) { return '' + s + ''; }).join("");
-}
-function selectCategory(cat) {
-activeCategory = cat;
-document.querySelectorAll(".tab-btn").forEach(function(btn) {
-btn.classList.toggle("active", btn.textContent === cat);
-});
-if (cat !== "All") {
-document.getElementById("taskCategory").value = cat;
-updateFormSubcategories();
-}
-updateFilterSubcategories();
-renderTasks();
-}
-document.getElementById("taskForm").addEventListener("submit", function(e) {
-e.preventDefault();
-const titleVal = document.getElementById("taskTitle").value.trim();
-if (!titleVal) return;
-const newTask = {
-id: Date.now().toString(),
-title: titleVal,
-category: document.getElementById("taskCategory").value,
-subcategory: document.getElementById("taskSubcategory").value,
-targetDate: document.getElementById("taskDate").value,
-priority: document.getElementById("taskPriority").value,
-status: document.getElementById("taskStatus").value,
-recurring: document.getElementById("taskRecurring").value,
-reminderMins: parseInt(document.getElementById("taskReminder").value, 10),
-notes: document.getElementById("taskNotes").value.trim()
-};
-tasks.push(newTask);
-saveTasks();
-document.getElementById("taskTitle").value = "";
-document.getElementById("taskNotes").value = "";
-renderAll();
-});
-function changeStatus(id, newStatus) {
-const task = tasks.find(function(t) { return t.id === id; });
-if (!task) return;
-task.status = newStatus;
-if (newStatus === "Complete" && task.recurring !== "none") {
-const nextDate = new Date(task.targetDate);
-if (task.recurring === "daily") nextDate.setDate(nextDate.getDate() + 1);
-if (task.recurring === "weekly") nextDate.setDate(nextDate.getDate() + 7);
-if (task.recurring === "monthly") nextDate.setMonth(nextDate.getMonth() + 1);
-if (task.recurring === "yearly") nextDate.setFullYear(nextDate.getFullYear() + 1);
-tasks.push({
-id: Date.now().toString(),
-title: task.title,
-category: task.category,
-subcategory: task.subcategory,
-targetDate: nextDate.toISOString().slice(0, 16),
-priority: task.priority,
-status: "In Progress",
-recurring: task.recurring,
-reminderMins: task.reminderMins,
-notes: task.notes
-});
-}
-saveTasks();
-renderAll();
-}
-function deleteTask(id) {
-tasks = tasks.filter(function(t) { return t.id !== id; });
-saveTasks();
-renderAll();
-}
-function openGoogleCalendar(id) {
-const t = tasks.find(function(item) { return item.id === id; });
-if (!t) return;
-const start = new Date(t.targetDate);
-const end = new Date(start.getTime() + 60 * 60 * 1000);
-const fmt = function(d) {
-return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-};
-const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
-const url = "google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
-window.open(url, "_blank");
-}
-function getCountdownInfo(targetDateStr, status) {
-const diff = new Date(targetDateStr).getTime() - Date.now();
-if (status === "Complete" || status === "Not needed") {
-return { text: status, overdue: false, nearing: false };
-}
-if (diff <= 0) {
-return { text: "Overdue!", overdue: true, nearing: true };
-}
-const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-const mins = Math.floor((diff / 1000 / 60) % 60);
-const secs = Math.floor((diff / 1000) % 60);
-return {
-text: days + "d " + hours + "h " + mins + "m " + secs + "s",
-overdue: false,
-nearing: diff <= 48 * 3600 * 1000
-};
-}
-function renderSummary() {
-const statusCounts = {};
-STATUSES.forEach(function(s) { statusCounts[s] = 0; });
-tasks.forEach(function(t) {
-statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
-});
-document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
-return '' + s + ': ' + statusCounts[s] + '';
-}).join("");
-const nearingTasks = tasks
-.filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
-.filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
-.sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
-const nearingEl = document.getElementById("nearingSummary");
-if (nearingTasks.length === 0) {
-nearingEl.innerHTML = 'No tasks due within the next 48 hours.';
-} else {
-nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
-const info = getCountdownInfo(t.targetDate, t.status);
-return '' + t.title + ' (' + t.category + ')' + info.text + '';
-}).join("");
-}
+  <div id="themeModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Choose Background Theme</h3>
+      <div class="bg-swatches">
+        <div class="swatch" style="background: linear-gradient(180deg, #1e1b4b 0%, #6d28d9 45%, #ec4899 75%, #fb923c 100%);" onclick="setScene('sunset')" title="Mountain Sunset"></div>
+        <div class="swatch" style="background: linear-gradient(180deg, #020617 0%, #064e3b 45%, #10b981 80%, #a7f3d0 100%);" onclick="setScene('aurora')" title="Northern Lights"></div>
+        <div class="swatch" style="background: linear-gradient(180deg, #0c4a6e 0%, #0284c7 50%, #7dd3fc 80%, #fef08a 100%);" onclick="setScene('ocean')" title="Ocean Horizon"></div>
+        <div class="swatch" style="background: linear-gradient(180deg, #020617 0%, #1e293b 60%, #334155 100%);" onclick="setScene('starry')" title="Starry Night"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);" onclick="setBg('linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)')" title="Clean Slate"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);" onclick="setBg('linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)')" title="Sky Blue"></div>
+      </div>
+      <label style="font-size: 0.85rem; font-weight: 600;">Custom Image URL:</label>
+      <div style="display: flex; gap: 8px;">
+        <input type="url" id="customImgUrl" placeholder="https://example.com" style="flex: 1;" />
+        <button type="button" onclick="setBgImage()" class="primary">Apply</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" onclick="closeModal('themeModal')" class="secondary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CATEGORIES = {
+      "All": [],
+      "Personal": ["Bill Payments", "Health", "Meet ups", "Family Gatherings", "Birthday Reminders"],
+      "Work": ["Project Deadlines", "Meeting Dates", "Tasks To Do"],
+      "Home Chores": ["Groceries", "To Do"],
+      "Kids": ["School", "Activities", "Appointments"]
+    };
+    const STATUSES = ["In Progress", "Waiting on", "Hold", "Complete", "Not needed"];
+    let activeCategory = "All";
+    let compactMode = false;
+    let notifiedIds = new Set();
+    let tasks = JSON.parse(localStorage.getItem("checklist_tasks_v1") || "[]");
+    if (!tasks.length) {
+      tasks = [
+        { id: "1", title: "Pay Electricity & Internet Bills", category: "Personal", subcategory: "Bill Payments", targetDate: new Date(Date.now() + 18 * 3600000).toISOString().slice(0, 16), priority: "High", status: "In Progress", recurring: "monthly", reminderMins: 60, notes: "Check autopay confirmation\\nDownload PDF receipt" },
+        { id: "2", title: "Q4 Project Milestone Review", category: "Work", subcategory: "Project Deadlines", targetDate: new Date(Date.now() + 42 * 3600000).toISOString().slice(0, 16), priority: "High", status: "Waiting on", recurring: "none", reminderMins: 1440, notes: "Waiting on design team assets\\nFinalize slide deck" },
+        { id: "3", title: "Weekly Grocery Run", category: "Home Chores", subcategory: "Groceries", targetDate: new Date(Date.now() + 72 * 3600000).toISOString().slice(0, 16), priority: "Medium", status: "In Progress", recurring: "weekly", reminderMins: 60, notes: "Milk & eggs\\nFresh produce\\nWhole grain bread" }
+      ];
+    }
+
+    const statusClass = s => "status-" + s.replace(/\s+/g, "-");
+    const saveTasks = () => localStorage.setItem("checklist_tasks_v1", JSON.stringify(tasks));
+
+    function initUI() {
+      document.getElementById("categoryTabs").innerHTML = Object.keys(CATEGORIES).map(c =>
+        `<button type="button" class="tab-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c}')">${c}</button>`
+      ).join("");
+      const catSel = document.getElementById("taskCategory");
+      catSel.innerHTML = Object.keys(CATEGORIES).filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join("");
+      catSel.addEventListener("change", updateFormSubs);
+      updateFormSubs();
+      updateFilterSubs();
+      document.getElementById("taskDate").value = new Date(Date.now() + 86400000).toISOString().slice(0, 16);
+    }
+
+    function updateFormSubs() {
+      const subs = CATEGORIES[document.getElementById("taskCategory").value] || [];
+      document.getElementById("taskSubcategory").innerHTML = subs.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+
+    function updateFilterSubs() {
+      const subs = activeCategory === "All" ? Object.values(CATEGORIES).flat() : (CATEGORIES[activeCategory] || []);
+      document.getElementById("filterSubcategory").innerHTML = `<option value="ALL">All Subcategories</option>` + subs.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+
+    function selectCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.textContent === cat));
+      if (cat !== "All") { document.getElementById("taskCategory").value = cat; updateFormSubs(); }
+      updateFilterSubs();
+      renderTasks();
+    }
+
+    document.getElementById("taskForm").addEventListener("submit", e => {
+      e.preventDefault();
+      tasks.push({
+        id: Date.now().toString(),
+        title: document.getElementById("taskTitle").value.trim(),
+        category: document.getElementById("taskCategory").value,
+        subcategory: document.getElementById("taskSubcategory").value,
+        targetDate: document.getElementById("taskDate").value,
+        priority: document.getElementById("taskPriority").value,
+        status: document.getElementById("taskStatus").value,
+        recurring: document.getElementById("taskRecurring").value,
+        reminderMins: parseInt(document.getElementById("taskReminder").value, 10),
+        notes: document.getElementById("taskNotes").value.trim()
+      });
+      saveTasks();
+      document.getElementById("taskTitle").value = "";
+      document.getElementById("taskNotes").value = "";
+      renderAll();
+    });
+
+    function changeStatus(id, newStatus) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      t.status = newStatus;
+      if (newStatus === "Complete" && t.recurring !== "none") {
+        const d = new Date(t.targetDate);
+        if (t.recurring === "daily") d.setDate(d.getDate() + 1);
+        if (t.recurring === "weekly") d.setDate(d.getDate() + 7);
+        if (t.recurring === "monthly") d.setMonth(d.getMonth() + 1);
+        if (t.recurring === "yearly") d.setFullYear(d.getFullYear() + 1);
+        tasks.push({ ...t, id: Date.now().toString(), targetDate: d.toISOString().slice(0, 16), status: "In Progress" });
+      }
+      saveTasks();
+      renderAll();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(x => x.id !== id);
+      saveTasks();
+      renderAll();
+    }
+
+    function openGoogleCalendar(id) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      const start = new Date(t.targetDate);
+      const end = new Date(start.getTime() + 3600000);
+      const fmt = d => d.toISOString().replace(/[-:]/g, "").split(".") + "Z";
+      const details = `Category: ${t.category} > ${t.subcategory}\nStatus: ${t.status}\nPriority: ${t.priority}\n\nNotes:\n${t.notes || "None"}`;
+      window.open(`https://google.com{encodeURIComponent(t.title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(details)}`, "_blank");
+    }
+
+    function getCountdown(dateStr, status) {
+      if (status === "Complete" || status === "Not needed") return { text: status, overdue: false };
+      const diff = new Date(dateStr).getTime() - Date.now();
+      if (diff <= 0) return { text: "Overdue!", overdue: true };
+      const d = Math.floor(diff / 86400000), h = Math.floor((diff / 3600000) % 24), m = Math.floor((diff / 60000) % 60), s = Math.floor((diff / 1000) % 60);
+      return { text: `${d}d ${h}h ${m}m ${s}s`, overdue: false };
+    }
+
+    function renderSummary() {
+      const counts = Object.fromEntries(STATUSES.map(s => [s, 0]));
+      tasks.forEach(t => counts[t.status] = (counts[t.status] || 0) + 1);
+      document.getElementById("statusSummary").innerHTML = STATUSES.map(s => `<span class="pill ${statusClass(s)}">${s}: ${counts[s]}</span>`).join("");
+
+      const near = tasks.filter(t => t.status !== "Complete" && t.status !== "Not needed" && (new Date(t.targetDate) - Date.now()) <= 172800000).sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
+      document.getElementById("nearingSummary").innerHTML = near.length
+
+? near.slice(0, 5).map(t => { const c = getCountdown(t.targetDate, t.status); return`<li><span><strong>${t.title}</strong> (${t.category})</span><span style="color:${c.overdue ? '#dc2626' : '#d97706'};font-weight:700;">${c.text}</span></li>`; }).join("")
+: <li style="color:var(--text-muted);">No tasks due within the next 48 hours.</li>;
 }
 function renderTasks() {
-const subFilter = document.getElementById("filterSubcategory").value;
-const statusFilter = document.getElementById("filterStatus").value;
-const sortBy = document.getElementById("sortBy").value;
-const priorityWeight = { High: 3, Medium: 2, Low: 1 };
-let filtered = tasks.filter(function(t) {
-if (activeCategory !== "All" && t.category !== activeCategory) return false;
-if (subFilter !== "ALL" && t.subcategory !== subFilter) return false;
-if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
-return true;
-});
-filtered.sort(function(a, b) {
-if (sortBy === "dateAsc") return new Date(a.targetDate) - new Date(b.targetDate);
-if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
-if (sortBy === "priority") return priorityWeight[b.priority] - priorityWeight[a.priority];
-return 0;
-});
-const listEl = document.getElementById("taskList");
-if (filtered.length === 0) {
-listEl.innerHTML = 'No activities match your current filters.';
-return;
-}
-listEl.innerHTML = filtered.map(function(t) {
-const cd = getCountdownInfo(t.targetDate, t.status);
-const isDone = t.status === "Complete" || t.status === "Not needed";
-const notesHtml = t.notes
-? 'Notes / Sub-list:' + t.notes.split("\n").map(function(line) { return '' + line + ''; }).join("") + ''
-: "";
-const statusOptions = STATUSES.map(function(s) {
-return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + s + '';
-}).join("");
-return '' +
-'' +
-'' +
-'' + t.title + '' +
-'' + t.category + ' › ' + t.subcategory + '' +
-'' + t.priority + '' +
-(t.recurring !== "none" ? '↻ ' + t.recurring + '' : '') +
-'' +
-'' +
-'' + cd.text + '' +
-'' +
-statusOptions +
-'' +
-'' +
-'' +
-'' +
-'Target: ' + new Date(t.targetDate).toLocaleString() + '' +
-notesHtml +
-'' +
-'Add to Google Calendar' +
-'Delete' +
-'' +
-'' +
-'';
+const subF = document.getElementById("filterSubcategory").value, stF = document.getElementById("filterStatus").value, sortBy = document.getElementById("sortBy").value;
+const w = { High: 3, Medium: 2, Low: 1 };
+let list = tasks.filter(t => (activeCategory === "All" || t.category === activeCategory) && (subF === "ALL" || t.subcategory === subF) && (stF === "ALL" || t.status === stF));
+list.sort((a, b) => sortBy === "dateAsc" ? new Date(a.targetDate) - new Date(b.targetDate) : sortBy === "dateDesc" ? new Date(b.targetDate) - new Date(a.targetDate) : w[b.priority] - w[a.priority]);
+const el = document.getElementById("taskList");
+if (!list.length) { el.innerHTML = <div class="card" style="text-align:center;color:var(--text-muted);">No activities match your filters.</div>; return; }
+el.innerHTML = list.map(t => {
+const cd = getCountdown(t.targetDate, t.status);
+const done = t.status === "Complete" || t.status === "Not needed";
+const notes = t.notes ? <div class="task-notes"><strong>Notes / Sub-list:</strong><ul>${t.notes.split("\n").map(l => ${l}).join("")}</ul></div> : "";
+return <div class="task-item priority-${t.priority} ${done ? 'is-done' : ''}"> <div class="task-header"> <div class="task-title-group"> <span class="task-title">${t.title}</span> <span class="badge">${t.category} &rsaquo; ${t.subcategory}</span> <span class="badge">${t.priority}</span> ${t.recurring !== "none" ? ↻ ${t.recurring}: ""} </div> <div style="display:flex;align-items:center;gap:8px;"> <span class="countdown-box ${cd.overdue ? 'overdue' : ''}" data-cd="${t.id}">${cd.text}</span> <select onchange="changeStatus('${t.id}', this.value)" class="${statusClass(t.status)}" style="font-weight:600;"> ${STATUSES.map(s =><option value="${s}" ${s === t.status ? 'selected' : ''}>${s}).join("")} </select> </div> </div> <div class="task-details"> <div style="font-size:0.85rem;color:var(--text-muted);">Target: <strong>${new Date(t.targetDate).toLocaleString()}</strong></div> ${notes} <div class="task-actions"> <button type="button" class="secondary" onclick="openGoogleCalendar('${t.id}')">Add to Google Calendar</button> <button type="button" class="secondary" style="color:#dc2626;" onclick="deleteTask('${t.id}')">Delete</button> </div> </div> </div>;
 }).join("");
 }
-function renderAll() {
-renderSummary();
-renderTasks();
-}
-setInterval(function() {
-tasks.forEach(function(t) {
-const el = document.querySelector('[data-countdown-id="' + t.id + '"]');
-const info = getCountdownInfo(t.targetDate, t.status);
-if (el) {
-el.textContent = info.text;
-el.classList.toggle("overdue", info.overdue);
-}
+const renderAll = () => { renderSummary(); renderTasks(); };
+setInterval(() => {
+tasks.forEach(t => {
+const el = document.querySelector([data-cd="${t.id}"]);
+const info = getCountdown(t.targetDate, t.status);
+if (el) { el.textContent = info.text; el.classList.toggle("overdue", info.overdue); }
 if (t.status !== "Complete" && t.status !== "Not needed" && !notifiedIds.has(t.id)) {
-const minsLeft = (new Date(t.targetDate).getTime() - Date.now()) / 60000;
-if (minsLeft <= t.reminderMins && minsLeft > -60) {
+const mins = (new Date(t.targetDate) - Date.now()) / 60000;
+if (mins <= t.reminderMins && mins > -60) {
 notifiedIds.add(t.id);
-const banner = document.getElementById("reminderBanner");
-document.getElementById("reminderText").textContent = 'Reminder: "' + t.title + '" (' + t.category + ') is due ' + (minsLeft <= 0 ? 'now' : 'in ' + Math.ceil(minsLeft) + ' mins') + '!';
-banner.style.display = "flex";
+document.getElementById("reminderText").textContent = Reminder: "${t.title}" is due ${mins <= 0 ? 'now' : 'in ' + Math.ceil(mins) + ' mins'}!;
+document.getElementById("reminderBanner").style.display = "flex";
 }
 }
 });
 }, 1000);
-["filterSubcategory", "filterStatus", "sortBy"].forEach(function(id) {
-document.getElementById(id).addEventListener("change", renderTasks);
-});
-document.getElementById("viewToggleBtn").addEventListener("click", function(e) {
+["filterSubcategory", "filterStatus", "sortBy"].forEach(id => document.getElementById(id).addEventListener("change", renderTasks));
+document.getElementById("viewToggleBtn").addEventListener("click", e => {
 compactMode = !compactMode;
 document.body.classList.toggle("compact-mode", compactMode);
 e.target.textContent = compactMode ? "Detailed View" : "Compact View";
 });
-document.getElementById("shareBtn").addEventListener("click", function() {
-const lines = ["TEMPOFLOW - CHECKLIST & COUNTDOWN SUMMARY", "========================================="];
-tasks.forEach(function(t) {
-lines.push("* [" + t.status + "] " + t.title + " (" + t.category + " > " + t.subcategory + ") - Due: " + new Date(t.targetDate).toLocaleString());
-if (t.notes) lines.push("   Notes: " + t.notes.split("\n").join("; "));
-});
-document.getElementById("shareText").value = lines.join("\n");
+document.getElementById("shareBtn").addEventListener("click", () => {
+document.getElementById("shareText").value = ["TEMPOFLOW SUMMARY", "================="].concat(tasks.map(t => • [${t.status}] ${t.title} (${t.category} > ${t.subcategory}) - Due: ${new Date(t.targetDate).toLocaleString()})).join("\n");
 document.getElementById("shareModal").style.display = "flex";
 });
-document.getElementById("copyShareBtn").addEventListener("click", function() {
-const ta = document.getElementById("shareText");
-ta.select();
-navigator.clipboard.writeText(ta.value);
+document.getElementById("copyShareBtn").addEventListener("click", () => {
+navigator.clipboard.writeText(document.getElementById("shareText").value);
 document.getElementById("copyShareBtn").textContent = "Copied!";
-setTimeout(function() {
-document.getElementById("copyShareBtn").textContent = "Copy to Clipboard";
-}, 2000);
+setTimeout(() => document.getElementById("copyShareBtn").textContent = "Copy to Clipboard", 2000);
 });
-document.getElementById("themeBtn").addEventListener("click", function() {
-document.getElementById("themeModal").style.display = "flex";
-});
-function applyWallpaper(cssImage) {
-document.body.style.backgroundImage = cssImage;
-document.body.style.backgroundSize = "cover";
-document.body.style.backgroundPosition = "center";
-document.body.style.backgroundAttachment = "fixed";
-document.body.style.backgroundRepeat = "no-repeat";
-try {
-localStorage.setItem("tempoflow_bg_v5", cssImage);
-} catch (e) {}
+document.getElementById("themeBtn").addEventListener("click", () => document.getElementById("themeModal").style.display = "flex");
+function applyWallpaper(img) {
+document.body.style.backgroundImage = img;
+localStorage.setItem("tempoflow_bg_v6", img);
 }
-function setBg(val) {
-applyWallpaper(val);
-}
-function setPhotoBg(url) {
-applyWallpaper("linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url('" + url + "')");
-}
+const setBg = val => applyWallpaper(val);
+const setPhotoBg = url => applyWallpaper(linear-gradient(rgba(15,23,42,0.25),rgba(15,23,42,0.25)), url('${url}'));
 function setScene(name) {
-const scenes = {
+const s = {
 sunset: "url("data:image/svg+xml;utf8,")",
 aurora: "url("data:image/svg+xml;utf8,")",
 ocean: "url("data:image/svg+xml;utf8,")",
 starry: "url("data:image/svg+xml;utf8,")"
 };
-if (scenes[name]) applyWallpaper(scenes[name]);
+if (s[name]) applyWallpaper(s[name]);
 }
-function setBgImage() {
-const url = document.getElementById("customImgUrl").value.trim();
-if (url) {
-setPhotoBg(url);
-}
-}
-function closeModal(id) {
-document.getElementById(id).style.display = "none";
-}
+const setBgImage = () => { const u = document.getElementById("customImgUrl").value.trim(); if (u) setPhotoBg(u); };
+const closeModal = id => document.getElementById(id).style.display = "none";
 initUI();
-try {
-const savedBg = localStorage.getItem("tempoflow_bg_v5");
-if (savedBg) {
-applyWallpaper(savedBg);
-} else {
-setScene("sunset");
-}
-} catch (e) {
-setScene("sunset");
-}
+const savedBg = localStorage.getItem("tempoflow_bg_v6");
+savedBg ? applyWallpaper(savedBg) : setScene("sunset");
 renderAll();
