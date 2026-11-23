@@ -348,9 +348,9 @@
 
     if (!tasks || !tasks.length) {
       tasks = [
-        { id: "1", title: "Pay Electricity & Internet Bills", category: "Personal", subcategory: "Bill Payments", targetDate: new Date(Date.now() + 18 * 3600000).toISOString().slice(0, 16), priority: "High", status: "In Progress", recurring: "monthly", reminderMins: 60, notes: "Check autopay confirmation\\nDownload PDF receipt" },
-        { id: "2", title: "Q4 Project Milestone Review", category: "Work", subcategory: "Project Deadlines", targetDate: new Date(Date.now() + 42 * 3600000).toISOString().slice(0, 16), priority: "High", status: "Waiting on", recurring: "none", reminderMins: 1440, notes: "Waiting on design team assets\\nFinalize slide deck" },
-        { id: "3", title: "Weekly Grocery Run", category: "Home Chores", subcategory: "Groceries", targetDate: new Date(Date.now() + 72 * 3600000).toISOString().slice(0, 16), priority: "Medium", status: "In Progress", recurring: "weekly", reminderMins: 60, notes: "Milk & eggs\\nFresh produce\\nWhole grain bread" }
+        { id: "1", title: "Pay Electricity & Internet Bills", category: "Personal", subcategory: "Bill Payments", targetDate: new Date(Date.now() + 18 * 3600000).toISOString().slice(0, 16), priority: "High", status: "In Progress", recurring: "monthly", reminderMins: 60, notes: "Check autopay confirmation | Download PDF receipt" },
+        { id: "2", title: "Q4 Project Milestone Review", category: "Work", subcategory: "Project Deadlines", targetDate: new Date(Date.now() + 42 * 3600000).toISOString().slice(0, 16), priority: "High", status: "Waiting on", recurring: "none", reminderMins: 1440, notes: "Waiting on design team assets | Finalize slide deck" },
+        { id: "3", title: "Weekly Grocery Run", category: "Home Chores", subcategory: "Groceries", targetDate: new Date(Date.now() + 72 * 3600000).toISOString().slice(0, 16), priority: "Medium", status: "In Progress", recurring: "weekly", reminderMins: 60, notes: "Milk & eggs | Fresh produce | Whole grain bread" }
       ];
     }
 
@@ -555,10 +555,11 @@ var cd = getCountdown(t.targetDate, t.status);
 var done = t.status === "Complete" || t.status === "Not needed";
 var notesHtml = "";
 if (t.notes) {
-var lines = t.notes.split("\n");
-if (lines.length === 1) lines = t.notes.split(String.fromCharCode(10));
+var lines = t.notes.indexOf("|") !== -1 ? t.notes.split("|") : t.notes.split(String.fromCharCode(10));
 var liHtml = "";
-for (var l = 0; l < lines.length; l++) liHtml += "" + lines[l] + "";
+for (var l = 0; l < lines.length; l++) {
+if (lines[l].trim()) liHtml += "" + lines[l].trim() + "";
+}
 notesHtml = 'Notes / Sub-list:' + liHtml + '';
 }
 var optHtml = "";
@@ -639,30 +640,28 @@ setTimeout(function() { document.getElementById("copyShareBtn").textContent = "C
 document.getElementById("themeBtn").onclick = function() {
 document.getElementById("themeModal").style.display = "flex";
 };
-function applyWallpaper(img) {
-document.body.style.backgroundImage = img;
-try { localStorage.setItem("tempoflow_bg_v8", img); } catch (e) {}
+function setBg(val) {
+document.body.style.backgroundImage = val;
+try { localStorage.setItem("tempoflow_bg_clean", val); } catch (e) {}
 }
-function setBg(val) { applyWallpaper(val); }
-function setPhotoBg(url) { applyWallpaper("linear-gradient(rgba(15,23,42,0.25),rgba(15,23,42,0.25)), url('" + url + "')"); }
 function setScene(name) {
-var s = {
-sunset: "url("data:image/svg+xml;utf8,")",
-aurora: "url("data:image/svg+xml;utf8,")",
-ocean: "url("data:image/svg+xml;utf8,")",
-starry: "url("data:image/svg+xml;utf8,")"
+var gradients = {
+sunset: "linear-gradient(180deg, #1e1b4b 0%, #6d28d9 45%, #ec4899 75%, #fb923c 100%)",
+aurora: "linear-gradient(180deg, #020617 0%, #064e3b 45%, #10b981 80%, #a7f3d0 100%)",
+ocean: "linear-gradient(180deg, #0c4a6e 0%, #0284c7 50%, #7dd3fc 80%, #fef08a 100%)",
+starry: "linear-gradient(180deg, #020617 0%, #1e293b 60%, #334155 100%)"
 };
-if (s[name]) applyWallpaper(s[name]);
+if (gradients[name]) setBg(gradients[name]);
 }
 function setBgImage() {
 var u = document.getElementById("customImgUrl").value.trim();
-if (u) setPhotoBg(u);
+if (u) setBg("url('" + u + "')");
 }
 function closeModal(id) {
 document.getElementById(id).style.display = "none";
 }
 initUI();
 var savedBg = null;
-try { savedBg = localStorage.getItem("tempoflow_bg_v8"); } catch (e) {}
-if (savedBg) { applyWallpaper(savedBg); } else { setScene("sunset"); }
+try { savedBg = localStorage.getItem("tempoflow_bg_clean"); } catch (e) {}
+if (savedBg) setBg(savedBg);
 renderAll();
