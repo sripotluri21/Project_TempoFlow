@@ -838,11 +838,15 @@ document.getElementById("themeBtn").addEventListener("click", function() {
 document.getElementById("themeModal").style.display = "flex";
 });
 function setBg(val) {
-document.body.style.background = val;
-try {
-localStorage.setItem("checklist_bg_v1", val);
-} catch (e) {}
-}
+      document.body.style.background = val;
+      try {
+        localStorage.setItem("checklist_bg_v2", val);
+      } catch (e) {}
+    }
+    function setPhotoBg(url) {
+      const bgVal = "linear-gradient(rgba(15, 23, 42, 0.28), rgba(15, 23, 42, 0.28)), url('" + url + "') center/cover fixed no-repeat";
+      setBg(bgVal);
+    }
     function setPhotoBg(url) {
       const bgVal = "linear-gradient(rgba(15, 23, 42, 0.28), rgba(15, 23, 42, 0.28)), url('" + url + "') center/cover fixed no-repeat";
       setBg(bgVal);
@@ -857,15 +861,15 @@ function closeModal(id) {
 document.getElementById(id).style.display = "none";
 }
 initUI();
-  try {
-        const savedBg = localStorage.getItem("checklist_bg_v1");
-        if (savedBg && savedBg.indexOf("unsplash") === -1) {
-          document.body.style.background = savedBg;
-        } else {
-          setPhotoBg("https://picsum.photos");
-        }
-      } catch (e) {}
-renderAll();
+    try {
+      const savedBg = localStorage.getItem("checklist_bg_v2");
+      if (savedBg) {
+        document.body.style.background = savedBg;
+      } else {
+        setPhotoBg("https://picsum.photos");
+      }
+    } catch (e) {}
+    renderAll();
   </script>
 </body>
 </html>
