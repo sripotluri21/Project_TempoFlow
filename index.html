@@ -714,63 +714,69 @@ return '' + t.title + ' (' + t.category + ')' + info.text + '';
 }).join("");
 }
 }
-function renderTasks() {
-const subFilter = document.getElementById("filterSubcategory").value;
-const statusFilter = document.getElementById("filterStatus").value;
-const sortBy = document.getElementById("sortBy").value;
-const priorityWeight = { High: 3, Medium: 2, Low: 1 };
-let filtered = tasks.filter(function(t) {
-if (activeCategory !== "All" && t.category !== activeCategory) return false;
-if (subFilter !== "ALL" && t.subcategory !== subFilter) return false;
-if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
-return true;
-});
-filtered.sort(function(a, b) {
-if (sortBy === "dateAsc") return new Date(a.targetDate) - new Date(b.targetDate);
-if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
-if (sortBy === "priority") return priorityWeight[b.priority] - priorityWeight[a.priority];
-return 0;
-});
-const listEl = document.getElementById("taskList");
-if (filtered.length === 0) {
-listEl.innerHTML = 'No activities match your current filters.';
-return;
-}
-listEl.innerHTML = filtered.map(function(t) {
-const cd = getCountdownInfo(t.targetDate, t.status);
-const isDone = t.status === "Complete" || t.status === "Not needed";
-const notesHtml = t.notes
-? 'Notes / Sub-list:' + t.notes.split("\n").map(function(line) { return '' + line + ''; }).join("") + ''
-: "";
-const statusOptions = STATUSES.map(function(s) {
-return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + s + '';
-}).join("");
-return '' +
-'' +
-'' +
-'' + t.title + '' +
-'' + t.category + ' › ' + t.subcategory + '' +
-'' + t.priority + '' +
-(t.recurring !== "none" ? '↻ ' + t.recurring + '' : '') +
-'' +
-'' +
-'' + cd.text + '' +
-'' +
-statusOptions +
-'' +
-'' +
-'' +
-'' +
-'Target: ' + new Date(t.targetDate).toLocaleString() + '' +
-notesHtml +
-'' +
-'Add to Google Calendar' +
-'Delete' +
-'' +
-'' +
-'';
-}).join("");
-}
+    function renderTasks() {
+      const subFilter = document.getElementById("filterSubcategory").value;
+      const statusFilter = document.getElementById("filterStatus").value;
+      const sortBy = document.getElementById("sortBy").value;
+      const priorityWeight = { High: 3, Medium: 2, Low: 1 };
+
+      let filtered = tasks.filter(function(t) {
+        if (activeCategory !== "All" && t.category !== activeCategory) return false;
+        if (subFilter !== "ALL" && t.subcategory !== subFilter) return false;
+        if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
+        return true;
+      });
+
+      filtered.sort(function(a, b) {
+        if (sortBy === "dateAsc") return new Date(a.targetDate) - new Date(b.targetDate);
+        if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
+        if (sortBy === "priority") return priorityWeight[b.priority] - priorityWeight[a.priority];
+        return 0;
+      });
+
+      const listEl = document.getElementById("taskList");
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="card" style="text-align:center; color: var(--text-muted);">No activities match your current filters.</div>';
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(function(t) {
+        const cd = getCountdownInfo(t.targetDate, t.status);
+        const isDone = t.status === "Complete" || t.status === "Not needed";
+        const notesHtml = t.notes
+          ? '<div class="task-notes"><strong>Notes / Sub-list:</strong><ul>' + t.notes.split("\n").map(function(line) { return '<li>' + line + '</li>'; }).join("") + '</ul></div>'
+          : "";
+
+        const statusOptions = STATUSES.map(function(s) {
+          return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + s + '</option>';
+        }).join("");
+
+        return '<div class="task-item priority-' + t.priority + ' ' + (isDone ? 'is-done' : '') + '">' +
+          '<div class="task-header">' +
+            '<div class="task-title-group">' +
+              '<span class="task-title">' + t.title + '</span>' +
+              '<span class="badge">' + t.category + ' &rsaquo; ' + t.subcategory + '</span>' +
+              '<span class="badge">' + t.priority + '</span>' +
+              (t.recurring !== "none" ? '<span class="badge">&#8635; ' + t.recurring + '</span>' : '') +
+            '</div>' +
+            '<div style="display:flex; align-items:center; gap:8px;">' +
+              '<span class="countdown-box ' + (cd.overdue ? 'overdue' : '') + '" data-countdown-id="' + t.id + '">' + cd.text + '</span>' +
+              '<select onchange="changeStatus(\'' + t.id + '\', this.value)" class="' + statusClass(t.status) + '" style="font-weight:600;">' +
+                statusOptions +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="task-details">' +
+            '<div style="font-size: 0.85rem; color: var(--text-muted);">Target: <strong>' + new Date(t.targetDate).toLocaleString() + '</strong></div>' +
+            notesHtml +
+            '<div class="task-actions">' +
+              '<button type="button" class="secondary" onclick="openGoogleCalendar(\'' + t.id + '\')">Add to Google Calendar</button>' +
+              '<button type="button" class="secondary" style="color:#dc2626;" onclick="deleteTask(\'' + t.id + '\')">Delete</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
 function renderAll() {
 renderSummary();
 renderTasks();
