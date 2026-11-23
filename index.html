@@ -437,6 +437,8 @@
     <div id="taskList" class="task-list"></div>
   </div>
 
+  </div>
+
   <div id="shareModal" class="modal-backdrop">
     <div class="modal">
       <h3>Share Checklist Summary</h3>
@@ -447,30 +449,31 @@
       </div>
     </div>
   </div>
-function applyWallpaper(cssImage) {
-      document.body.style.backgroundImage = cssImage;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.backgroundPosition = "center";
-      document.body.style.backgroundAttachment = "fixed";
-      document.body.style.backgroundRepeat = "no-repeat";
-      try {
-        localStorage.setItem("tempoflow_bg_v4", cssImage);
-      } catch (e) {}
-    }
 
-    function setPhotoBg(url) {
-      applyWallpaper("linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url('" + url + "')");
-    }
+  <div id="themeModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Choose Background Theme</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Scenic Landscapes</p>
+      <div class="bg-swatches">
+        <div class="swatch" style="background: linear-gradient(180deg, #1e1b4b 0%, #6d28d9 45%, #ec4899 75%, #fb923c 100%);" onclick="setScene('sunset')" title="Mountain Sunset"></div>
+        <div class="swatch" style="background: linear-gradient(180deg, #020617 0%, #064e3b 45%, #10b981 80%, #a7f3d0 100%);" onclick="setScene('aurora')" title="Northern Lights"></div>
+        <div class="swatch" style="background: linear-gradient(180deg, #0c4a6e 0%, #0284c7 50%, #7dd3fc 80%, #fef08a 100%);" onclick="setScene('ocean')" title="Ocean Horizon"></div>
+        <div class="swatch" style="background: linear-gradient(180deg, #020617 0%, #1e293b 60%, #334155 100%);" onclick="setScene('starry')" title="Starry Night"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);" onclick="setBg('linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)')" title="Default Slate"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);" onclick="setBg('linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)')" title="Sky Blue"></div>
+      </div>
 
-    function setScene(name) {
-      const scenes = {
-        sunset: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 1600 900' preserveAspectRatio='none'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='%231e1b4b'/><stop offset='40%' stop-color='%236d28d9'/><stop offset='72%' stop-color='%23ec4899'/><stop offset='100%' stop-color='%23fb923c'/></linearGradient></defs><rect width='1600' height='900' fill='url(%23g)'/><circle cx='1150' cy='520' r='110' fill='%23fef08a' opacity='0.85'/><polygon points='0,900 0,620 260,440 540,650 820,410 1120,620 1380,460 1600,590 1600,900' fill='%23311042' opacity='0.85'/><polygon points='0,900 0,710 340,540 680,730 1020,510 1340,700 1600,580 1600,900' fill='%230f172a'/></svg>\")",
-        aurora: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 1600 900' preserveAspectRatio='none'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='%23020617'/><stop offset='45%' stop-color='%23064e3b'/><stop offset='80%' stop-color='%2310b981'/><stop offset='100%' stop-color='%23a7f3d0'/></linearGradient></defs><rect width='1600' height='900' fill='url(%23g)'/><polygon points='0,900 0,650 300,470 620,660 950,430 1280,640 1600,490 1600,900' fill='%23022c22' opacity='0.9'/><polygon points='0,900 0,740 420,580 860,750 1250,560 1600,700 1600,900' fill='%23020617'/></svg>\")",
-        ocean: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 1600 900' preserveAspectRatio='none'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='%230c4a6e'/><stop offset='50%' stop-color='%230284c7'/><stop offset='75%' stop-color='%237dd3fc'/><stop offset='100%' stop-color='%23fef08a'/></linearGradient></defs><rect width='1600' height='900' fill='url(%23g)'/><circle cx='800' cy='540' r='90' fill='%23fef9c3' opacity='0.9'/><path d='M0,620 Q400,570 800,620 T1600,620 L1600,900 L0,900 Z' fill='%230369a1' opacity='0.8'/><path d='M0,700 Q400,750 800,700 T1600,700 L1600,900 L0,900 Z' fill='%230c4a6e'/></svg>\")",
-        starry: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 1600 900' preserveAspectRatio='none'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='%23020617'/><stop offset='60%' stop-color='%231e293b'/><stop offset='100%' stop-color='%23334155'/></linearGradient></defs><rect width='1600' height='900' fill='url(%23g)'/><circle cx='250' cy='180' r='3' fill='white'/><circle cx='520' cy='120' r='2.5' fill='white'/><circle cx='880' cy='210' r='3' fill='white'/><circle cx='1220' cy='140' r='2.5' fill='white'/><circle cx='1410' cy='260' r='2' fill='white'/><polygon points='0,900 0,680 380,490 760,690 1160,460 1600,660 1600,900' fill='%23090d16'/></svg>\")"
-      };
-      if (scenes[name]) applyWallpaper(scenes[name]);
-    }
+      <label style="font-size: 0.85rem; font-weight: 600;">Custom Image URL:</label>
+      <div style="display: flex; gap: 8px;">
+        <input type="url" id="customImgUrl" placeholder="https://example.com" style="flex: 1;" />
+        <button type="button" onclick="setBgImage()" class="primary">Apply</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" onclick="closeModal('themeModal')" class="secondary">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const CATEGORIES = {
       "All": [],
@@ -666,7 +669,7 @@ function applyWallpaper(cssImage) {
       const start = new Date(t.targetDate);
       const end = new Date(start.getTime() + 60 * 60 * 1000);
       const fmt = function(d) {
-        return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+        return d.toISOString().replace(/[-:]/g, "").split(".") + "Z";
       };
       const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
       const url = "https://google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
@@ -674,55 +677,50 @@ function applyWallpaper(cssImage) {
     }
 
     function getCountdownInfo(targetDateStr, status) {
-      const diff = new Date(targetDateStr).getTime() - Date.now();
-      if (status === "Complete" || status === "Not needed") {
-        return { text: status, overdue: false, nearing: false };
-      }
-      if (diff <= 0) {
-        return { text: "Overdue!", overdue: true, nearing: true };
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((diff / 1000 / 60) % 60);
-      const secs = Math.floor((diff / 1000) % 60);
-      return {
-        text: days + "d " + hours + "h " + mins + "m " + secs + "s",
-        overdue: false,
-        nearing: diff <= 48 * 3600 * 1000
-      };
-    }
-
-    function renderSummary() {
-      const statusCounts = {};
-      STATUSES.forEach(function(s) { statusCounts[s] = 0; });
-      tasks.forEach(function(t) {
-        statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
-      });
-
-      document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
-        return '<span class="pill ' + statusClass(s) + '">' + s + ': ' + statusCounts[s] + '</span>';
-      }).join("");
-
-      const nearingTasks = tasks
-        .filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
-        .filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
-        .sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
-
-      const nearingEl = document.getElementById("nearingSummary");
-      if (nearingTasks.length === 0) {
-        nearingEl.innerHTML = '<li style="color: var(--text-muted);">No tasks due within the next 48 hours.</li>';
-      } else {
-        nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
-          const info = getCountdownInfo(t.targetDate, t.status);
-          return '<li><span><strong>' + t.title + '</strong> (' + t.category + ')</span><span style="color: ' + (info.overdue ? '#dc2626' : '#d97706') + '; font-weight: 700;">' + info.text + '</span></li>';
-        }).join("");
-      }
-    }
-
-    function renderTasks() {
-      const subFilter = document.getElementById("filterSubcategory").value;
-      const statusFilter = document.getElementById("filterStatus").value;
-      const sortBy = document.getElementById("sortBy").value;
+const diff = new Date(targetDateStr).getTime() - Date.now();
+if (status === "Complete" || status === "Not needed") {
+return { text: status, overdue: false, nearing: false };
+}
+if (diff <= 0) {
+return { text: "Overdue!", overdue: true, nearing: true };
+}
+const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+const mins = Math.floor((diff / 1000 / 60) % 60);
+const secs = Math.floor((diff / 1000) % 60);
+return {
+text: days + "d " + hours + "h " + mins + "m " + secs + "s",
+overdue: false,
+nearing: diff <= 48 * 3600 * 1000
+};
+}
+function renderSummary() {
+const statusCounts = {};
+STATUSES.forEach(function(s) { statusCounts[s] = 0; });
+tasks.forEach(function(t) {
+statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
+});
+document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
+return '' + s + ': ' + statusCounts[s] + '';
+}).join("");
+const nearingTasks = tasks
+.filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
+.filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
+.sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
+const nearingEl = document.getElementById("nearingSummary");
+if (nearingTasks.length === 0) {
+nearingEl.innerHTML = 'No tasks due within the next 48 hours.';
+} else {
+nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
+const info = getCountdownInfo(t.targetDate, t.status);
+return '' + t.title + ' (' + t.category + ')' + info.text + '';
+}).join("");
+}
+}
+function renderTasks() {
+const subFilter = document.getElementById("filterSubcategory").value;
+const statusFilter = document.getElementById("filterStatus").value;
+const sortBy = document.getElementById("sortBy").value;
 const priorityWeight = { High: 3, Medium: 2, Low: 1 };
 let filtered = tasks.filter(function(t) {
 if (activeCategory !== "All" && t.category !== activeCategory) return false;
