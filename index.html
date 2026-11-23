@@ -563,11 +563,6 @@ function applyWallpaper(cssImage) {
 
       const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
       document.getElementById("taskDate").value = tomorrow.toISOString().slice(0, 16);
-
-      try {
-        const savedBg = localStorage.getItem("checklist_bg_v1");
-        if (savedBg) document.body.style.background = savedBg;
-      } catch (e) {}
     }
 
     function updateFormSubcategories() {
@@ -640,144 +635,147 @@ function applyWallpaper(cssImage) {
         if (task.recurring === "daily") nextDate.setDate(nextDate.getDate() + 1);
         if (task.recurring === "weekly") nextDate.setDate(nextDate.getDate() + 7);
         if (task.recurring === "monthly") nextDate.setMonth(nextDate.getMonth() + 1);
-if (task.recurring === "yearly") nextDate.setFullYear(nextDate.getFullYear() + 1);
-tasks.push({
-id: Date.now().toString(),
-title: task.title,
-category: task.category,
-subcategory: task.subcategory,
-targetDate: nextDate.toISOString().slice(0, 16),
-priority: task.priority,
-status: "In Progress",
-recurring: task.recurring,
-reminderMins: task.reminderMins,
-notes: task.notes
-});
-}
-saveTasks();
-renderAll();
-}
-function deleteTask(id) {
-tasks = tasks.filter(function(t) { return t.id !== id; });
-saveTasks();
-renderAll();
-}
-function openGoogleCalendar(id) {
-const t = tasks.find(function(item) { return item.id === id; });
-if (!t) return;
-const start = new Date(t.targetDate);
-const end = new Date(start.getTime() + 60 * 60 * 1000);
-const fmt = function(d) {
-return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-};
-const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
-const url = "google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
-window.open(url, "_blank");
-}
-function getCountdownInfo(targetDateStr, status) {
-const diff = new Date(targetDateStr).getTime() - Date.now();
-if (status === "Complete" || status === "Not needed") {
-return { text: status, overdue: false, nearing: false };
-}
-if (diff <= 0) {
-return { text: "Overdue!", overdue: true, nearing: true };
-}
-const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-const mins = Math.floor((diff / 1000 / 60) % 60);
-const secs = Math.floor((diff / 1000) % 60);
-return {
-text: days + "d " + hours + "h " + mins + "m " + secs + "s",
-overdue: false,
-nearing: diff <= 48 * 3600 * 1000
-};
-}
-function renderSummary() {
-const statusCounts = {};
-STATUSES.forEach(function(s) { statusCounts[s] = 0; });
-tasks.forEach(function(t) {
-statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
-});
-document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
-return '' + s + ': ' + statusCounts[s] + '';
-}).join("");
-const nearingTasks = tasks
-.filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
-.filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
-.sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
-const nearingEl = document.getElementById("nearingSummary");
-if (nearingTasks.length === 0) {
-nearingEl.innerHTML = 'No tasks due within the next 48 hours.';
-} else {
-nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
-const info = getCountdownInfo(t.targetDate, t.status);
-return '' + t.title + ' (' + t.category + ')' + info.text + '';
-}).join("");
-}
-}
+        if (task.recurring === "yearly") nextDate.setFullYear(nextDate.getFullYear() + 1);
+
+        tasks.push({
+          id: Date.now().toString(),
+          title: task.title,
+          category: task.category,
+          subcategory: task.subcategory,
+          targetDate: nextDate.toISOString().slice(0, 16),
+          priority: task.priority,
+          status: "In Progress",
+          recurring: task.recurring,
+          reminderMins: task.reminderMins,
+          notes: task.notes
+        });
+      }
+      saveTasks();
+      renderAll();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(function(t) { return t.id !== id; });
+      saveTasks();
+      renderAll();
+    }
+
+    function openGoogleCalendar(id) {
+      const t = tasks.find(function(item) { return item.id === id; });
+      if (!t) return;
+      const start = new Date(t.targetDate);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const fmt = function(d) {
+        return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      };
+      const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
+      const url = "https://google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
+      window.open(url, "_blank");
+    }
+
+    function getCountdownInfo(targetDateStr, status) {
+      const diff = new Date(targetDateStr).getTime() - Date.now();
+      if (status === "Complete" || status === "Not needed") {
+        return { text: status, overdue: false, nearing: false };
+      }
+      if (diff <= 0) {
+        return { text: "Overdue!", overdue: true, nearing: true };
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / 1000 / 60) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+      return {
+        text: days + "d " + hours + "h " + mins + "m " + secs + "s",
+        overdue: false,
+        nearing: diff <= 48 * 3600 * 1000
+      };
+    }
+
+    function renderSummary() {
+      const statusCounts = {};
+      STATUSES.forEach(function(s) { statusCounts[s] = 0; });
+      tasks.forEach(function(t) {
+        statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
+      });
+
+      document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
+        return '<span class="pill ' + statusClass(s) + '">' + s + ': ' + statusCounts[s] + '</span>';
+      }).join("");
+
+      const nearingTasks = tasks
+        .filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
+        .filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
+        .sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
+
+      const nearingEl = document.getElementById("nearingSummary");
+      if (nearingTasks.length === 0) {
+        nearingEl.innerHTML = '<li style="color: var(--text-muted);">No tasks due within the next 48 hours.</li>';
+      } else {
+        nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
+          const info = getCountdownInfo(t.targetDate, t.status);
+          return '<li><span><strong>' + t.title + '</strong> (' + t.category + ')</span><span style="color: ' + (info.overdue ? '#dc2626' : '#d97706') + '; font-weight: 700;">' + info.text + '</span></li>';
+        }).join("");
+      }
+    }
+
     function renderTasks() {
       const subFilter = document.getElementById("filterSubcategory").value;
       const statusFilter = document.getElementById("filterStatus").value;
       const sortBy = document.getElementById("sortBy").value;
-      const priorityWeight = { High: 3, Medium: 2, Low: 1 };
-
-      let filtered = tasks.filter(function(t) {
-        if (activeCategory !== "All" && t.category !== activeCategory) return false;
-        if (subFilter !== "ALL" && t.subcategory !== subFilter) return false;
-        if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
-        return true;
-      });
-
-      filtered.sort(function(a, b) {
-        if (sortBy === "dateAsc") return new Date(a.targetDate) - new Date(b.targetDate);
-        if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
-        if (sortBy === "priority") return priorityWeight[b.priority] - priorityWeight[a.priority];
-        return 0;
-      });
-
-      const listEl = document.getElementById("taskList");
-      if (filtered.length === 0) {
-        listEl.innerHTML = '<div class="card" style="text-align:center; color: var(--text-muted);">No activities match your current filters.</div>';
-        return;
-      }
-
-      listEl.innerHTML = filtered.map(function(t) {
-        const cd = getCountdownInfo(t.targetDate, t.status);
-        const isDone = t.status === "Complete" || t.status === "Not needed";
-        const notesHtml = t.notes
-          ? '<div class="task-notes"><strong>Notes / Sub-list:</strong><ul>' + t.notes.split("\n").map(function(line) { return '<li>' + line + '</li>'; }).join("") + '</ul></div>'
-          : "";
-
-        const statusOptions = STATUSES.map(function(s) {
-          return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + s + '</option>';
-        }).join("");
-
-        return '<div class="task-item priority-' + t.priority + ' ' + (isDone ? 'is-done' : '') + '">' +
-          '<div class="task-header">' +
-            '<div class="task-title-group">' +
-              '<span class="task-title">' + t.title + '</span>' +
-              '<span class="badge">' + t.category + ' &rsaquo; ' + t.subcategory + '</span>' +
-              '<span class="badge">' + t.priority + '</span>' +
-              (t.recurring !== "none" ? '<span class="badge">&#8635; ' + t.recurring + '</span>' : '') +
-            '</div>' +
-            '<div style="display:flex; align-items:center; gap:8px;">' +
-              '<span class="countdown-box ' + (cd.overdue ? 'overdue' : '') + '" data-countdown-id="' + t.id + '">' + cd.text + '</span>' +
-              '<select onchange="changeStatus(\'' + t.id + '\', this.value)" class="' + statusClass(t.status) + '" style="font-weight:600;">' +
-                statusOptions +
-              '</select>' +
-            '</div>' +
-          '</div>' +
-          '<div class="task-details">' +
-            '<div style="font-size: 0.85rem; color: var(--text-muted);">Target: <strong>' + new Date(t.targetDate).toLocaleString() + '</strong></div>' +
-            notesHtml +
-            '<div class="task-actions">' +
-              '<button type="button" class="secondary" onclick="openGoogleCalendar(\'' + t.id + '\')">Add to Google Calendar</button>' +
-              '<button type="button" class="secondary" style="color:#dc2626;" onclick="deleteTask(\'' + t.id + '\')">Delete</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      }).join("");
-    }
+const priorityWeight = { High: 3, Medium: 2, Low: 1 };
+let filtered = tasks.filter(function(t) {
+if (activeCategory !== "All" && t.category !== activeCategory) return false;
+if (subFilter !== "ALL" && t.subcategory !== subFilter) return false;
+if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
+return true;
+});
+filtered.sort(function(a, b) {
+if (sortBy === "dateAsc") return new Date(a.targetDate) - new Date(b.targetDate);
+if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
+if (sortBy === "priority") return priorityWeight[b.priority] - priorityWeight[a.priority];
+return 0;
+});
+const listEl = document.getElementById("taskList");
+if (filtered.length === 0) {
+listEl.innerHTML = 'No activities match your current filters.';
+return;
+}
+listEl.innerHTML = filtered.map(function(t) {
+const cd = getCountdownInfo(t.targetDate, t.status);
+const isDone = t.status === "Complete" || t.status === "Not needed";
+const notesHtml = t.notes
+? 'Notes / Sub-list:' + t.notes.split("\n").map(function(line) { return '' + line + ''; }).join("") + ''
+: "";
+const statusOptions = STATUSES.map(function(s) {
+return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + s + '';
+}).join("");
+return '' +
+'' +
+'' +
+'' + t.title + '' +
+'' + t.category + ' › ' + t.subcategory + '' +
+'' + t.priority + '' +
+(t.recurring !== "none" ? '↻ ' + t.recurring + '' : '') +
+'' +
+'' +
+'' + cd.text + '' +
+'' +
+statusOptions +
+'' +
+'' +
+'' +
+'' +
+'Target: ' + new Date(t.targetDate).toLocaleString() + '' +
+notesHtml +
+'' +
+'Add to Google Calendar' +
+'Delete' +
+'' +
+'' +
+'';
+}).join("");
+}
 function renderAll() {
 renderSummary();
 renderTasks();
@@ -810,7 +808,7 @@ document.body.classList.toggle("compact-mode", compactMode);
 e.target.textContent = compactMode ? "Detailed View" : "Compact View";
 });
 document.getElementById("shareBtn").addEventListener("click", function() {
-const lines = ["CHECKLIST & COUNTDOWN SUMMARY", "================================"];
+const lines = ["TEMPOFLOW — CHECKLIST & COUNTDOWN SUMMARY", "==========================================="];
 tasks.forEach(function(t) {
 lines.push("• [" + t.status + "] " + t.title + " (" + t.category + " > " + t.subcategory + ") - Due: " + new Date(t.targetDate).toLocaleString());
 if (t.notes) lines.push("   Notes: " + t.notes.replace(/\n/g, "; "));
@@ -830,27 +828,49 @@ document.getElementById("copyShareBtn").textContent = "Copy to Clipboard";
 document.getElementById("themeBtn").addEventListener("click", function() {
 document.getElementById("themeModal").style.display = "flex";
 });
+function applyWallpaper(cssImage) {
+document.body.style.backgroundImage = cssImage;
+document.body.style.backgroundSize = "cover";
+document.body.style.backgroundPosition = "center";
+document.body.style.backgroundAttachment = "fixed";
+document.body.style.backgroundRepeat = "no-repeat";
+try {
+localStorage.setItem("tempoflow_bg_v4", cssImage);
+} catch (e) {}
+}
+function setBg(val) {
+applyWallpaper(val);
+}
+function setPhotoBg(url) {
+applyWallpaper("linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url('" + url + "')");
+}
+function setScene(name) {
+const scenes = {
+sunset: "url("data:image/svg+xml;utf8,")",
+aurora: "url("data:image/svg+xml;utf8,")",
+ocean: "url("data:image/svg+xml;utf8,")",
+starry: "url("data:image/svg+xml;utf8,")"
+};
+if (scenes[name]) applyWallpaper(scenes[name]);
+}
 function setBgImage() {
 const url = document.getElementById("customImgUrl").value.trim();
 if (url) {
-setBg("url('" + url + "') center/cover fixed no-repeat");
+setPhotoBg(url);
 }
 }
 function closeModal(id) {
 document.getElementById(id).style.display = "none";
 }
 initUI();
-    try {
-      const savedBg = localStorage.getItem("tempoflow_bg_v4");
-      if (savedBg) {
-        applyWallpaper(savedBg);
-      } else {
-        setScene("sunset");
-      }
-    } catch (e) {
-      setScene("sunset");
-    }
-    renderAll();
-  </script>
-</body>
-</html>}
+try {
+const savedBg = localStorage.getItem("tempoflow_bg_v4");
+if (savedBg) {
+applyWallpaper(savedBg);
+} else {
+setScene("sunset");
+}
+} catch (e) {
+setScene("sunset");
+}
+renderAll();
