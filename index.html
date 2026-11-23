@@ -698,9 +698,20 @@ STATUSES.forEach(function(s) { statusCounts[s] = 0; });
 tasks.forEach(function(t) {
 statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
 });
-document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
-return '' + s + ': ' + statusCounts[s] + '';
-}).join("");
+const pillColors = {
+        "In Progress": "background:#dbeafe; color:#1e40af;",
+        "Waiting on": "background:#fef3c7; color:#92400e;",
+        "Hold": "background:#f3e8ff; color:#6b21a8;",
+        "Complete": "background:#dcfce7; color:#166534;",
+        "Not needed": "background:#f1f5f9; color:#475569;"
+      };
+
+      document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
+        const span = document.createElement("span");
+        span.textContent = s + ": " + statusCounts[s];
+        span.style.cssText = "display:inline-block; margin:4px 8px 4px 0; padding:6px 12px; border-radius:999px; font-size:0.8rem; font-weight:600; " + pillColors[s];
+        return span.outerHTML;
+      }).join("");
 const nearingTasks = tasks
 .filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
 .filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
