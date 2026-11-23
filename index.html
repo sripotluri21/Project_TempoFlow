@@ -339,26 +339,29 @@
     var compactMode = false;
     var notifiedIds = {};
     var tasks = [];
+
     try {
       tasks = JSON.parse(localStorage.getItem("checklist_tasks_v1") || "[]");
     } catch (e) {
       tasks = [];
     }
+
     if (!tasks || !tasks.length) {
       tasks = [
-        { id: "1", title: "Pay Electricity & Internet Bills", category: "Personal", subcategory: "Bill Payments", targetDate: new Date(Date.now() + 18 * 3600000).toISOString().slice(0, 16), priority: "High", status: "In Progress", recurring: "monthly", reminderMins: 60, notes: "Check autopay confirmation\nDownload PDF receipt" },
-        { id: "2", title: "Q4 Project Milestone Review", category: "Work", subcategory: "Project Deadlines", targetDate: new Date(Date.now() + 42 * 3600000).toISOString().slice(0, 16), priority: "High", status: "Waiting on", recurring: "none", reminderMins: 1440, notes: "Waiting on design team assets\nFinalize slide deck" },
-        { id: "3", title: "Weekly Grocery Run", category: "Home Chores", subcategory: "Groceries", targetDate: new Date(Date.now() + 72 * 3600000).toISOString().slice(0, 16), priority: "Medium", status: "In Progress", recurring: "weekly", reminderMins: 60, notes: "Milk & eggs\nFresh produce\nWhole grain bread" }
+        { id: "1", title: "Pay Electricity & Internet Bills", category: "Personal", subcategory: "Bill Payments", targetDate: new Date(Date.now() + 18 * 3600000).toISOString().slice(0, 16), priority: "High", status: "In Progress", recurring: "monthly", reminderMins: 60, notes: "Check autopay confirmation\\nDownload PDF receipt" },
+        { id: "2", title: "Q4 Project Milestone Review", category: "Work", subcategory: "Project Deadlines", targetDate: new Date(Date.now() + 42 * 3600000).toISOString().slice(0, 16), priority: "High", status: "Waiting on", recurring: "none", reminderMins: 1440, notes: "Waiting on design team assets\\nFinalize slide deck" },
+        { id: "3", title: "Weekly Grocery Run", category: "Home Chores", subcategory: "Groceries", targetDate: new Date(Date.now() + 72 * 3600000).toISOString().slice(0, 16), priority: "Medium", status: "In Progress", recurring: "weekly", reminderMins: 60, notes: "Milk & eggs\\nFresh produce\\nWhole grain bread" }
       ];
     }
+
     function statusClass(s) {
       return "status-" + s.replace(/\s+/g, "-");
     }
+
     function saveTasks() {
-      try {
-        localStorage.setItem("checklist_tasks_v1", JSON.stringify(tasks));
-      } catch (e) {}
+      try { localStorage.setItem("checklist_tasks_v1", JSON.stringify(tasks)); } catch (e) {}
     }
+
     function initUI() {
       var cats = Object.keys(CATEGORIES);
       var tabsHtml = "";
@@ -367,12 +370,11 @@
         tabsHtml += '<button type="button" class="tab-btn ' + (c === activeCategory ? 'active' : '') + '" onclick="selectCategory(\'' + c + '\')">' + c + '</button>';
       }
       document.getElementById("categoryTabs").innerHTML = tabsHtml;
+
       var catSel = document.getElementById("taskCategory");
       var optHtml = "";
       for (var j = 0; j < cats.length; j++) {
-        if (cats[j] !== "All") {
-          optHtml += '<option value="' + cats[j] + '">' + cats[j] + '</option>';
-        }
+        if (cats[j] !== "All") optHtml += '<option value="' + cats[j] + '">' + cats[j] + '</option>';
       }
       catSel.innerHTML = optHtml;
       catSel.onchange = updateFormSubs;
@@ -380,36 +382,31 @@
       updateFilterSubs();
       document.getElementById("taskDate").value = new Date(Date.now() + 86400000).toISOString().slice(0, 16);
     }
+
     function updateFormSubs() {
       var subs = CATEGORIES[document.getElementById("taskCategory").value] || [];
       var html = "";
-      for (var i = 0; i < subs.length; i++) {
-        html += '<option value="' + subs[i] + '">' + subs[i] + '</option>';
-      }
+      for (var i = 0; i < subs.length; i++) html += '<option value="' + subs[i] + '">' + subs[i] + '</option>';
       document.getElementById("taskSubcategory").innerHTML = html;
     }
+
     function updateFilterSubs() {
       var subs = [];
       if (activeCategory === "All") {
         var keys = Object.keys(CATEGORIES);
-        for (var k = 0; k < keys.length; k++) {
-          subs = subs.concat(CATEGORIES[keys[k]]);
-        }
+        for (var k = 0; k < keys.length; k++) subs = subs.concat(CATEGORIES[keys[k]]);
       } else {
         subs = CATEGORIES[activeCategory] || [];
       }
       var html = '<option value="ALL">All Subcategories</option>';
-      for (var i = 0; i < subs.length; i++) {
-        html += '<option value="' + subs[i] + '">' + subs[i] + '</option>';
-      }
+      for (var i = 0; i < subs.length; i++) html += '<option value="' + subs[i] + '">' + subs[i] + '</option>';
       document.getElementById("filterSubcategory").innerHTML = html;
     }
+
     function selectCategory(cat) {
       activeCategory = cat;
       var btns = document.querySelectorAll(".tab-btn");
-      for (var i = 0; i < btns.length; i++) {
-        btns[i].classList.toggle("active", btns[i].textContent === cat);
-      }
+      for (var i = 0; i < btns.length; i++) btns[i].classList.toggle("active", btns[i].textContent === cat);
       if (cat !== "All") {
         document.getElementById("taskCategory").value = cat;
         updateFormSubs();
@@ -417,6 +414,7 @@
       updateFilterSubs();
       renderTasks();
     }
+
     document.getElementById("taskForm").onsubmit = function(e) {
       e.preventDefault();
       tasks.push({
@@ -436,6 +434,7 @@
       document.getElementById("taskNotes").value = "";
       renderAll();
     };
+
     function changeStatus(id, newStatus) {
       for (var i = 0; i < tasks.length; i++) {
         if (tasks[i].id === id) {
@@ -466,20 +465,23 @@
       saveTasks();
       renderAll();
     }
+
     function deleteTask(id) {
       tasks = tasks.filter(function(x) { return x.id !== id; });
       saveTasks();
       renderAll();
     }
+
     function openGoogleCalendar(id) {
       var t = tasks.find(function(x) { return x.id === id; });
       if (!t) return;
       var start = new Date(t.targetDate);
       var end = new Date(start.getTime() + 3600000);
-      function fmt(d) { return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"; }
-      var details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
+      function fmt(d) { return d.toISOString().replace(/[-:]/g, "").split(".") + "Z"; }
+      var details = "Category: " + t.category + " > " + t.subcategory + " | Status: " + t.status + " | Priority: " + t.priority + " | Notes: " + (t.notes || "None");
       window.open("https://google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details), "_blank");
     }
+
     function getCountdown(dateStr, status) {
       if (status === "Complete" || status === "Not needed") return { text: status, overdue: false };
       var diff = new Date(dateStr).getTime() - Date.now();
@@ -490,6 +492,7 @@
       var s = Math.floor((diff / 1000) % 60);
       return { text: d + "d " + h + "h " + m + "m " + s + "s", overdue: false };
     }
+
     function renderSummary() {
       var counts = {};
       for (var i = 0; i < STATUSES.length; i++) counts[STATUSES[i]] = 0;
@@ -541,10 +544,11 @@
 
       var el = document.getElementById("taskList");
       if (list.length === 0) {
-        el.innerHTML = 'No activities match your filters.';
-return;
-}
-var html = "";
+        el.innerHTML = '<div class="card" style="text-align:center;color:var(--text-muted);">No activities match your filters.</div>';
+        return;
+      }
+
+      var html = "";
 for (var i = 0; i < list.length; i++) {
 var t = list[i];
 var cd = getCountdown(t.targetDate, t.status);
@@ -552,6 +556,7 @@ var done = t.status === "Complete" || t.status === "Not needed";
 var notesHtml = "";
 if (t.notes) {
 var lines = t.notes.split("\n");
+if (lines.length === 1) lines = t.notes.split(String.fromCharCode(10));
 var liHtml = "";
 for (var l = 0; l < lines.length; l++) liHtml += "" + lines[l] + "";
 notesHtml = 'Notes / Sub-list:' + liHtml + '';
@@ -623,7 +628,7 @@ for (var i = 0; i < tasks.length; i++) {
 var t = tasks[i];
 lines.push("* [" + t.status + "] " + t.title + " (" + t.category + " > " + t.subcategory + ") - Due: " + new Date(t.targetDate).toLocaleString());
 }
-document.getElementById("shareText").value = lines.join("\n");
+document.getElementById("shareText").value = lines.join(String.fromCharCode(10));
 document.getElementById("shareModal").style.display = "flex";
 };
 document.getElementById("copyShareBtn").onclick = function() {
@@ -636,7 +641,7 @@ document.getElementById("themeModal").style.display = "flex";
 };
 function applyWallpaper(img) {
 document.body.style.backgroundImage = img;
-try { localStorage.setItem("tempoflow_bg_v7", img); } catch (e) {}
+try { localStorage.setItem("tempoflow_bg_v8", img); } catch (e) {}
 }
 function setBg(val) { applyWallpaper(val); }
 function setPhotoBg(url) { applyWallpaper("linear-gradient(rgba(15,23,42,0.25),rgba(15,23,42,0.25)), url('" + url + "')"); }
@@ -658,6 +663,6 @@ document.getElementById(id).style.display = "none";
 }
 initUI();
 var savedBg = null;
-try { savedBg = localStorage.getItem("tempoflow_bg_v7"); } catch (e) {}
+try { savedBg = localStorage.getItem("tempoflow_bg_v8"); } catch (e) {}
 if (savedBg) { applyWallpaper(savedBg); } else { setScene("sunset"); }
 renderAll();
