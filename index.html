@@ -729,21 +729,19 @@ const nearingEl = document.getElementById("nearingSummary");
           const info = getCountdownInfo(t.targetDate, t.status);
           const li = document.createElement("li");
           li.style.cssText = "padding: 8px 0; border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; align-items: center; gap: 12px;";
-
           const left = document.createElement("span");
           const strong = document.createElement("strong");
           strong.textContent = t.title;
           left.appendChild(strong);
           left.appendChild(document.createTextNode(" (" + t.category + ")"));
-
           const right = document.createElement("span");
           right.style.cssText = "color: " + (info.overdue ? "#dc2626" : "#d97706") + "; font-weight: 700; white-space: nowrap;";
           right.textContent = info.text;
-
           li.appendChild(left);
           li.appendChild(right);
           nearingEl.appendChild(li);
         });
+      }
       }
     function renderTasks() {
       const subFilter = document.getElementById("filterSubcategory").value;
