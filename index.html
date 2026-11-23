@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Life & Work Checklist & Countdown Tracker</title>
+  <title>TempoFlow — Smart Checklist & Countdown Tracker</title>
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
@@ -350,7 +350,7 @@
   <div class="container">
     <header>
       <div>
-        <h1>Checklist & Countdown Tracker</h1>
+        <h1>TempoFlow — Smart Checklist & Countdown Tracker</h1>
         <small style="color: var(--text-muted);">Organize Personal, Work, Home Chores & Kids tasks</small>
       </div>
       <div class="toolbar">
@@ -451,14 +451,23 @@
   <div id="themeModal" class="modal-backdrop">
     <div class="modal">
       <h3>Choose Background Theme</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Scenic Wallpapers</p>
+      <div class="bg-swatches">
+        <div class="swatch" style="background: url('https://unsplash.com') center/cover;" onclick="setPhotoBg('https://unsplash.com')" title="Yosemite Valley"></div>
+        <div class="swatch" style="background: url('https://unsplash.com') center/cover;" onclick="setPhotoBg('https://unsplash.com')" title="Misty Peaks"></div>
+        <div class="swatch" style="background: url('https://unsplash.com') center/cover;" onclick="setPhotoBg('https://unsplash.com')" title="Coastal Sunrise"></div>
+        <div class="swatch" style="background: url('https://unsplash.com') center/cover;" onclick="setPhotoBg('https://unsplash.com')" title="Starry Night Ridge"></div>
+        <div class="swatch" style="background: url('https://unsplash.com') center/cover;" onclick="setPhotoBg('https://unsplash.com')" title="Sunlit Forest"></div>
+        <div class="swatch" style="background: url('https://unsplash.com') center/cover;" onclick="setPhotoBg('https://unsplash.com')" title="Ocean Waves"></div>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Clean Gradients</p>
       <div class="bg-swatches">
         <div class="swatch" style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);" onclick="setBg('linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)')" title="Default Slate"></div>
         <div class="swatch" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);" onclick="setBg('linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)')" title="Sky Blue"></div>
-        <div class="swatch" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);" onclick="setBg('linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)')" title="Mint Fresh"></div>
-        <div class="swatch" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);" onclick="setBg('linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)')" title="Warm Sand"></div>
-        <div class="swatch" style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);" onclick="setBg('linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)')" title="Soft Lavender"></div>
         <div class="swatch" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);" onclick="setBg('linear-gradient(135deg, #1e293b 0%, #0f172a 100%)')" title="Midnight"></div>
       </div>
+
       <label style="font-size: 0.85rem; font-weight: 600;">Custom Image URL:</label>
       <div style="display: flex; gap: 8px;">
         <input type="url" id="customImgUrl" placeholder="https://example.com" style="flex: 1;" />
@@ -835,6 +844,10 @@ try {
 localStorage.setItem("checklist_bg_v1", val);
 } catch (e) {}
 }
+function setPhotoBg(url) {
+      const bgVal = "linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)), url('" + url + "') center/cover fixed no-repeat";
+      setBg(bgVal);
+    }
 function setBgImage() {
 const url = document.getElementById("customImgUrl").value.trim();
 if (url) {
