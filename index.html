@@ -95,7 +95,6 @@
       background: #f0f4f8;
     }
 
-    /* Reminder Banner */
     #reminderBanner {
       display: none;
       background: #fef3c7;
@@ -109,7 +108,6 @@
       gap: 12px;
     }
 
-    /* Summary Dashboard */
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -147,11 +145,11 @@
       font-weight: 600;
     }
 
-    .status-In\ Progress { background: #dbeafe; color: #1e40af; }
-    .status-Waiting\ on { background: #fef3c7; color: #92400e; }
+    .status-In-Progress { background: #dbeafe; color: #1e40af; }
+    .status-Waiting-on { background: #fef3c7; color: #92400e; }
     .status-Hold { background: #f3e8ff; color: #6b21a8; }
     .status-Complete { background: #dcfce7; color: #166534; }
-    .status-Not\ needed { background: #f1f5f9; color: #475569; }
+    .status-Not-needed { background: #f1f5f9; color: #475569; }
 
     .nearing-list {
       list-style: none;
@@ -168,7 +166,6 @@
 
     .nearing-list li:last-child { border-bottom: none; }
 
-    /* Tabs */
     .tabs {
       display: flex;
       flex-wrap: wrap;
@@ -189,7 +186,6 @@
       color: #fff;
     }
 
-    /* Add Form */
     .add-form {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -201,7 +197,6 @@
       grid-column: 1 / -1;
     }
 
-    /* Filter Bar */
     .filter-bar {
       display: flex;
       flex-wrap: wrap;
@@ -210,7 +205,6 @@
       align-items: center;
     }
 
-    /* Task List */
     .task-list {
       display: flex;
       flex-direction: column;
@@ -309,7 +303,6 @@
       justify-content: space-between;
     }
 
-    /* Compact View */
     body.compact-mode .task-item {
       padding: 10px 14px;
     }
@@ -317,7 +310,6 @@
       display: none;
     }
 
-    /* Modal */
     .modal-backdrop {
       display: none;
       position: fixed;
@@ -363,18 +355,17 @@
         <small style="color: var(--text-muted);">Organize Personal, Work, Home Chores & Kids tasks</small>
       </div>
       <div class="toolbar">
-        <button id="viewToggleBtn" class="secondary">Compact View</button>
-        <button id="themeBtn" class="secondary">Backgrounds</button>
-        <button id="shareBtn" class="primary">Share / Export</button>
+        <button type="button" id="viewToggleBtn" class="secondary">Compact View</button>
+        <button type="button" id="themeBtn" class="secondary">Backgrounds</button>
+        <button type="button" id="shareBtn" class="primary">Share / Export</button>
       </div>
     </header>
 
     <div id="reminderBanner">
       <span id="reminderText"></span>
-      <button onclick="document.getElementById('reminderBanner').style.display='none'" class="secondary">Dismiss</button>
+      <button type="button" onclick="document.getElementById('reminderBanner').style.display='none'" class="secondary">Dismiss</button>
     </div>
 
-    <!-- Summary Section -->
     <div class="summary-grid">
       <div class="card">
         <h2>Task Status Overview</h2>
@@ -386,10 +377,8 @@
       </div>
     </div>
 
-    <!-- Category Tabs -->
     <div class="tabs" id="categoryTabs"></div>
 
-    <!-- Add Activity Form -->
     <div class="card" style="margin-bottom: 20px;">
       <h2>Add New Activity</h2>
       <form id="taskForm" class="add-form">
@@ -416,3 +405,442 @@
           <option value="monthly">Monthly</option>
           <option value="yearly">Yearly</option>
         </select>
+                <select id="taskReminder">
+          <option value="0">Remind at due time</option>
+          <option value="15">15 mins before</option>
+          <option value="60" selected>1 hour before</option>
+          <option value="1440">1 day before</option>
+        </select>
+        <textarea id="taskNotes" class="full-width" rows="2" placeholder="Optional notes or sub-list items (one item per line)..."></textarea>
+        <button type="submit" class="primary full-width">+ Add Activity</button>
+      </form>
+    </div>
+
+    <div class="filter-bar">
+      <select id="filterSubcategory">
+        <option value="ALL">All Subcategories</option>
+      </select>
+      <select id="filterStatus">
+        <option value="ALL">All Statuses</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Waiting on">Waiting on</option>
+        <option value="Hold">Hold</option>
+        <option value="Complete">Complete</option>
+        <option value="Not needed">Not needed</option>
+      </select>
+      <select id="sortBy">
+        <option value="dateAsc">Sort: Nearest Target Date</option>
+        <option value="dateDesc">Sort: Furthest Target Date</option>
+        <option value="priority">Sort: Highest Priority</option>
+      </select>
+    </div>
+
+    <div id="taskList" class="task-list"></div>
+  </div>
+
+  <div id="shareModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Share Checklist Summary</h3>
+      <textarea id="shareText" rows="10" readonly></textarea>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" id="copyShareBtn" class="primary">Copy to Clipboard</button>
+        <button type="button" onclick="closeModal('shareModal')" class="secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="themeModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Choose Background Theme</h3>
+      <div class="bg-swatches">
+        <div class="swatch" style="background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);" onclick="setBg('linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)')" title="Default Slate"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);" onclick="setBg('linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)')" title="Sky Blue"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);" onclick="setBg('linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)')" title="Mint Fresh"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);" onclick="setBg('linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)')" title="Warm Sand"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);" onclick="setBg('linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)')" title="Soft Lavender"></div>
+        <div class="swatch" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);" onclick="setBg('linear-gradient(135deg, #1e293b 0%, #0f172a 100%)')" title="Midnight"></div>
+      </div>
+      <label style="font-size: 0.85rem; font-weight: 600;">Custom Image URL:</label>
+      <div style="display: flex; gap: 8px;">
+        <input type="url" id="customImgUrl" placeholder="https://example.com" style="flex: 1;" />
+        <button type="button" onclick="setBgImage()" class="primary">Apply</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" onclick="closeModal('themeModal')" class="secondary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CATEGORIES = {
+      "All": [],
+      "Personal": ["Bill Payments", "Health", "Meet ups", "Family Gatherings", "Birthday Reminders"],
+      "Work": ["Project Deadlines", "Meeting Dates", "Tasks To Do"],
+      "Home Chores": ["Groceries", "To Do"],
+      "Kids": ["School", "Activities", "Appointments"]
+    };
+
+    const STATUSES = ["In Progress", "Waiting on", "Hold", "Complete", "Not needed"];
+
+    let activeCategory = "All";
+    let compactMode = false;
+    let notifiedIds = new Set();
+
+    let tasks = [];
+    try {
+      const saved = localStorage.getItem("checklist_tasks_v1");
+      if (saved) tasks = JSON.parse(saved);
+    } catch (e) {
+      tasks = [];
+    }
+
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      tasks = [
+        {
+          id: "1",
+          title: "Pay Electricity & Internet Bills",
+          category: "Personal",
+          subcategory: "Bill Payments",
+          targetDate: new Date(Date.now() + 18 * 3600 * 1000).toISOString().slice(0, 16),
+          priority: "High",
+          status: "In Progress",
+          recurring: "monthly",
+          reminderMins: 60,
+          notes: "Check autopay confirmation\nDownload PDF receipt"
+        },
+        {
+          id: "2",
+          title: "Q4 Project Milestone Review",
+          category: "Work",
+          subcategory: "Project Deadlines",
+          targetDate: new Date(Date.now() + 42 * 3600 * 1000).toISOString().slice(0, 16),
+          priority: "High",
+          status: "Waiting on",
+          recurring: "none",
+          reminderMins: 1440,
+          notes: "Waiting on design team assets\nFinalize slide deck"
+        },
+        {
+          id: "3",
+          title: "Weekly Grocery Run",
+          category: "Home Chores",
+          subcategory: "Groceries",
+          targetDate: new Date(Date.now() + 72 * 3600 * 1000).toISOString().slice(0, 16),
+          priority: "Medium",
+          status: "In Progress",
+          recurring: "weekly",
+          reminderMins: 60,
+          notes: "Milk & eggs\nFresh produce\nWhole grain bread"
+        }
+      ];
+    }
+
+    function statusClass(status) {
+      return "status-" + status.replace(/\s+/g, "-");
+    }
+
+    function saveTasks() {
+      try {
+        localStorage.setItem("checklist_tasks_v1", JSON.stringify(tasks));
+      } catch (e) {}
+    }
+
+    function initUI() {
+      const tabsEl = document.getElementById("categoryTabs");
+      tabsEl.innerHTML = Object.keys(CATEGORIES).map(function(cat) {
+        return '<button type="button" class="tab-btn ' + (cat === activeCategory ? 'active' : '') + '" onclick="selectCategory(\'' + cat + '\')">' + cat + '</button>';
+      }).join("");
+
+      const catSelect = document.getElementById("taskCategory");
+      catSelect.innerHTML = Object.keys(CATEGORIES)
+        .filter(function(c) { return c !== "All"; })
+        .map(function(cat) { return '<option value="' + cat + '">' + cat + '</option>'; })
+        .join("");
+
+      catSelect.addEventListener("change", updateFormSubcategories);
+      updateFormSubcategories();
+      updateFilterSubcategories();
+
+      const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
+      document.getElementById("taskDate").value = tomorrow.toISOString().slice(0, 16);
+
+      try {
+        const savedBg = localStorage.getItem("checklist_bg_v1");
+        if (savedBg) document.body.style.background = savedBg;
+      } catch (e) {}
+    }
+
+    function updateFormSubcategories() {
+      const cat = document.getElementById("taskCategory").value;
+      const subSelect = document.getElementById("taskSubcategory");
+      const subs = CATEGORIES[cat] || [];
+      subSelect.innerHTML = subs.map(function(sub) {
+        return '<option value="' + sub + '">' + sub + '</option>';
+      }).join("");
+    }
+
+    function updateFilterSubcategories() {
+      const filterSub = document.getElementById("filterSubcategory");
+      let subs = [];
+      if (activeCategory === "All") {
+        Object.values(CATEGORIES).forEach(function(arr) {
+          subs = subs.concat(arr);
+        });
+      } else {
+        subs = CATEGORIES[activeCategory] || [];
+      }
+      filterSub.innerHTML = '<option value="ALL">All Subcategories</option>' +
+        subs.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join("");
+    }
+
+    function selectCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll(".tab-btn").forEach(function(btn) {
+        btn.classList.toggle("active", btn.textContent === cat);
+      });
+      if (cat !== "All") {
+        document.getElementById("taskCategory").value = cat;
+        updateFormSubcategories();
+      }
+      updateFilterSubcategories();
+      renderTasks();
+    }
+
+    document.getElementById("taskForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const titleVal = document.getElementById("taskTitle").value.trim();
+      if (!titleVal) return;
+
+      const newTask = {
+        id: Date.now().toString(),
+        title: titleVal,
+        category: document.getElementById("taskCategory").value,
+        subcategory: document.getElementById("taskSubcategory").value,
+        targetDate: document.getElementById("taskDate").value,
+        priority: document.getElementById("taskPriority").value,
+        status: document.getElementById("taskStatus").value,
+        recurring: document.getElementById("taskRecurring").value,
+        reminderMins: parseInt(document.getElementById("taskReminder").value, 10),
+        notes: document.getElementById("taskNotes").value.trim()
+      };
+      tasks.push(newTask);
+      saveTasks();
+      document.getElementById("taskTitle").value = "";
+      document.getElementById("taskNotes").value = "";
+      renderAll();
+    });
+
+    function changeStatus(id, newStatus) {
+      const task = tasks.find(function(t) { return t.id === id; });
+      if (!task) return;
+      task.status = newStatus;
+
+      if (newStatus === "Complete" && task.recurring !== "none") {
+        const nextDate = new Date(task.targetDate);
+        if (task.recurring === "daily") nextDate.setDate(nextDate.getDate() + 1);
+        if (task.recurring === "weekly") nextDate.setDate(nextDate.getDate() + 7);
+        if (task.recurring === "monthly") nextDate.setMonth(nextDate.getMonth() + 1);
+if (task.recurring === "yearly") nextDate.setFullYear(nextDate.getFullYear() + 1);
+tasks.push({
+id: Date.now().toString(),
+title: task.title,
+category: task.category,
+subcategory: task.subcategory,
+targetDate: nextDate.toISOString().slice(0, 16),
+priority: task.priority,
+status: "In Progress",
+recurring: task.recurring,
+reminderMins: task.reminderMins,
+notes: task.notes
+});
+}
+saveTasks();
+renderAll();
+}
+function deleteTask(id) {
+tasks = tasks.filter(function(t) { return t.id !== id; });
+saveTasks();
+renderAll();
+}
+function openGoogleCalendar(id) {
+const t = tasks.find(function(item) { return item.id === id; });
+if (!t) return;
+const start = new Date(t.targetDate);
+const end = new Date(start.getTime() + 60 * 60 * 1000);
+const fmt = function(d) {
+return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+};
+const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
+const url = "google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
+window.open(url, "_blank");
+}
+function getCountdownInfo(targetDateStr, status) {
+const diff = new Date(targetDateStr).getTime() - Date.now();
+if (status === "Complete" || status === "Not needed") {
+return { text: status, overdue: false, nearing: false };
+}
+if (diff <= 0) {
+return { text: "Overdue!", overdue: true, nearing: true };
+}
+const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+const mins = Math.floor((diff / 1000 / 60) % 60);
+const secs = Math.floor((diff / 1000) % 60);
+return {
+text: days + "d " + hours + "h " + mins + "m " + secs + "s",
+overdue: false,
+nearing: diff <= 48 * 3600 * 1000
+};
+}
+function renderSummary() {
+const statusCounts = {};
+STATUSES.forEach(function(s) { statusCounts[s] = 0; });
+tasks.forEach(function(t) {
+statusCounts[t.status] = (statusCounts[t.status] || 0) + 1;
+});
+document.getElementById("statusSummary").innerHTML = STATUSES.map(function(s) {
+return '' + s + ': ' + statusCounts[s] + '';
+}).join("");
+const nearingTasks = tasks
+.filter(function(t) { return t.status !== "Complete" && t.status !== "Not needed"; })
+.filter(function(t) { return (new Date(t.targetDate).getTime() - Date.now()) <= 48 * 3600 * 1000; })
+.sort(function(a, b) { return new Date(a.targetDate) - new Date(b.targetDate); });
+const nearingEl = document.getElementById("nearingSummary");
+if (nearingTasks.length === 0) {
+nearingEl.innerHTML = 'No tasks due within the next 48 hours.';
+} else {
+nearingEl.innerHTML = nearingTasks.slice(0, 5).map(function(t) {
+const info = getCountdownInfo(t.targetDate, t.status);
+return '' + t.title + ' (' + t.category + ')' + info.text + '';
+}).join("");
+}
+}
+function renderTasks() {
+const subFilter = document.getElementById("filterSubcategory").value;
+const statusFilter = document.getElementById("filterStatus").value;
+const sortBy = document.getElementById("sortBy").value;
+const priorityWeight = { High: 3, Medium: 2, Low: 1 };
+let filtered = tasks.filter(function(t) {
+if (activeCategory !== "All" && t.category !== activeCategory) return false;
+if (subFilter !== "ALL" && t.subcategory !== subFilter) return false;
+if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
+return true;
+});
+filtered.sort(function(a, b) {
+if (sortBy === "dateAsc") return new Date(a.targetDate) - new Date(b.targetDate);
+if (sortBy === "dateDesc") return new Date(b.targetDate) - new Date(a.targetDate);
+if (sortBy === "priority") return priorityWeight[b.priority] - priorityWeight[a.priority];
+return 0;
+});
+const listEl = document.getElementById("taskList");
+if (filtered.length === 0) {
+listEl.innerHTML = 'No activities match your current filters.';
+return;
+}
+listEl.innerHTML = filtered.map(function(t) {
+const cd = getCountdownInfo(t.targetDate, t.status);
+const isDone = t.status === "Complete" || t.status === "Not needed";
+const notesHtml = t.notes
+? 'Notes / Sub-list:' + t.notes.split("\n").map(function(line) { return '' + line + ''; }).join("") + ''
+: "";
+const statusOptions = STATUSES.map(function(s) {
+return '<option value="' + s + '" ' + (s === t.status ? 'selected' : '') + '>' + s + '';
+}).join("");
+return '' +
+'' +
+'' +
+'' + t.title + '' +
+'' + t.category + ' › ' + t.subcategory + '' +
+'' + t.priority + '' +
+(t.recurring !== "none" ? '↻ ' + t.recurring + '' : '') +
+'' +
+'' +
+'' + cd.text + '' +
+'' +
+statusOptions +
+'' +
+'' +
+'' +
+'' +
+'Target: ' + new Date(t.targetDate).toLocaleString() + '' +
+notesHtml +
+'' +
+'Add to Google Calendar' +
+'Delete' +
+'' +
+'' +
+'';
+}).join("");
+}
+function renderAll() {
+renderSummary();
+renderTasks();
+}
+setInterval(function() {
+tasks.forEach(function(t) {
+const el = document.querySelector('[data-countdown-id="' + t.id + '"]');
+const info = getCountdownInfo(t.targetDate, t.status);
+if (el) {
+el.textContent = info.text;
+el.classList.toggle("overdue", info.overdue);
+}
+if (t.status !== "Complete" && t.status !== "Not needed" && !notifiedIds.has(t.id)) {
+const minsLeft = (new Date(t.targetDate).getTime() - Date.now()) / 60000;
+if (minsLeft <= t.reminderMins && minsLeft > -60) {
+notifiedIds.add(t.id);
+const banner = document.getElementById("reminderBanner");
+document.getElementById("reminderText").textContent = 'Reminder: "' + t.title + '" (' + t.category + ') is due ' + (minsLeft <= 0 ? 'now' : 'in ' + Math.ceil(minsLeft) + ' mins') + '!';
+banner.style.display = "flex";
+}
+}
+});
+}, 1000);
+["filterSubcategory", "filterStatus", "sortBy"].forEach(function(id) {
+document.getElementById(id).addEventListener("change", renderTasks);
+});
+document.getElementById("viewToggleBtn").addEventListener("click", function(e) {
+compactMode = !compactMode;
+document.body.classList.toggle("compact-mode", compactMode);
+e.target.textContent = compactMode ? "Detailed View" : "Compact View";
+});
+document.getElementById("shareBtn").addEventListener("click", function() {
+const lines = ["CHECKLIST & COUNTDOWN SUMMARY", "================================"];
+tasks.forEach(function(t) {
+lines.push("• [" + t.status + "] " + t.title + " (" + t.category + " > " + t.subcategory + ") - Due: " + new Date(t.targetDate).toLocaleString());
+if (t.notes) lines.push("   Notes: " + t.notes.replace(/\n/g, "; "));
+});
+document.getElementById("shareText").value = lines.join("\n");
+document.getElementById("shareModal").style.display = "flex";
+});
+document.getElementById("copyShareBtn").addEventListener("click", function() {
+const ta = document.getElementById("shareText");
+ta.select();
+navigator.clipboard.writeText(ta.value);
+document.getElementById("copyShareBtn").textContent = "Copied!";
+setTimeout(function() {
+document.getElementById("copyShareBtn").textContent = "Copy to Clipboard";
+}, 2000);
+});
+document.getElementById("themeBtn").addEventListener("click", function() {
+document.getElementById("themeModal").style.display = "flex";
+});
+function setBg(val) {
+document.body.style.background = val;
+try {
+localStorage.setItem("checklist_bg_v1", val);
+} catch (e) {}
+}
+function setBgImage() {
+const url = document.getElementById("customImgUrl").value.trim();
+if (url) {
+setBg("url('" + url + "') center/cover fixed no-repeat");
+}
+}
+function closeModal(id) {
+document.getElementById(id).style.display = "none";
+}
+initUI();
+renderAll();
+  </script>
+</body>
+</html>
