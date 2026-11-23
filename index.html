@@ -671,7 +671,7 @@ const fmt = function(d) {
 return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 };
 const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
-const url = "google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
+const url = "https://google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
 window.open(url, "_blank");
 }
 function getCountdownInfo(targetDateStr, status) {
