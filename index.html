@@ -663,17 +663,21 @@ saveTasks();
 renderAll();
 }
 function openGoogleCalendar(id) {
-const t = tasks.find(function(item) { return item.id === id; });
-if (!t) return;
-const start = new Date(t.targetDate);
-const end = new Date(start.getTime() + 60 * 60 * 1000);
-const fmt = function(d) {
-return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-};
-const details = "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None");
-const url = "https://google.com" + encodeURIComponent(t.title) + "&dates=" + fmt(start) + "/" + fmt(end) + "&details=" + encodeURIComponent(details);
-window.open(url, "_blank");
-}
+      const t = tasks.find(function(item) { return item.id === id; });
+      if (!t) return;
+      const start = new Date(t.targetDate);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const fmt = function(d) {
+        return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      };
+      const params = new URLSearchParams({
+        action: "TEMPLATE",
+        text: t.title,
+        dates: fmt(start) + "/" + fmt(end),
+        details: "Category: " + t.category + " > " + t.subcategory + "\nStatus: " + t.status + "\nPriority: " + t.priority + "\n\nNotes:\n" + (t.notes || "None")
+      });
+      window.open("https://google.com?" + params.toString(), "_blank");
+    }
 function getCountdownInfo(targetDateStr, status) {
 const diff = new Date(targetDateStr).getTime() - Date.now();
 if (status === "Complete" || status === "Not needed") {
